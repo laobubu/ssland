@@ -9,6 +9,11 @@ html {
     font-family: DejaVu Sans Mono, Monaco, Consolas, Courier New, Courier, monospace;
 }
 
+pre {
+    background-color: #FFF;
+    padding: 1ch;
+}
+
 h1,h2,h3,h4,h5 {
     font-weight: normal;
 }
@@ -23,7 +28,11 @@ a {
 }
 
 input[type=text], input[type=password] {
-    border: 1px solid #303841;
+    border: none;
+    outline: 1px solid #303841;
+    box-shadow: 1px solid #303841;
+    vertical-align: middle;
+    padding: 5px 10px;
 }
 
 button, input[type=submit] {
@@ -32,6 +41,7 @@ button, input[type=submit] {
     padding: 5px 10px;
     color: #eeeeee;
     cursor: pointer;
+    vertical-align: middle;
 }
 
 button:hover, input[type=submit]:hover, 

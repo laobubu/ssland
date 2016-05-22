@@ -3,10 +3,41 @@
 <div class="wrapper">
   <h1>Welcome back {{ user.username }}</h1>
   <p>Here is the configuration: </p>
-  <p></p>
+  
+  <pre>SSCONFIG</pre>
+  
+  <h2>Edit</h2>
+
+  <form action="/sskey" method="POST">
+    <p>
+      <label>
+        Shadowsocks' Key: 
+        <input type="text" name="sskey" value="{{ user.sskey }}">
+      </label>
+      <input type="submit" value="Modify">
+    </p>
+  </form>
+  
+  <form name="login" action="/passwd" method="POST">
+    <p>
+      <label>
+        Account Password:
+        <input type="password" name="password">
+      </label>
+      <input type="submit" value="Modify">
+    </p>
+    <input type="hidden" name="username" value="{{ user.username }}">
+    <input type="hidden" name="md5ed" value="0">
+    <p id="md5alert"><b>INSECURE!</b> Hashing system failed to load. Your password will be transferred as-is. Make sure you have enabled JavaScript.</p>
+  </form>
+  
+  <p>Use different keyphase to keep safe.</p>
+  
   <p>
     <a href="/logout">Logout</a>
   </p>
 </div>
+
+<script> var SALT="{{ config.USER_SALT }}"; </script>
 
 % include('_footer.html')

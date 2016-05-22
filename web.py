@@ -38,11 +38,31 @@ def require_login(func):
 
 # Website
 
+@post('/passwd')
+@require_login
+def passwd():
+    password = request.forms.get('password')
+    if not (request.forms.get('md5ed') == '1' and re.match(r'^[a-f\d]{32}$', password)):
+        password = user.salt_password(password)
+    current_user.salted_password = password
+    current_user.write()
+    return redirect('/')
+
+@post('/sskey')
+@require_login
+def passwd():
+    sskey = request.forms.get('sskey')
+    current_user.sskey = sskey
+    current_user.write()
+    return redirect('/')
+
 
 @route('/')
 @require_login
 def server_index():
-    return template('home', user=current_user)
+    return template('home', config=config, user=current_user)
+
+# Login and Logout
 
 @get('/logout')
 def logout():

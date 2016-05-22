@@ -4,6 +4,7 @@
 #  Config Module.
 #
 
+# User account password hashing salt. Make it complex :)
 USER_SALT = "~amADmANiNabLUEbOX!"
 
 # Directories

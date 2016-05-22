@@ -45,5 +45,5 @@ if scope == 'user':
         username = argv[0] if len(argv) > 0 else raw_input('Username: ')
         password = argv[1] if len(argv) > 1 else getpass.getpass()
         u = user.open(username)
-        u.salted_password = user.salt_password(password)
+        u.set_password(password)
         u.write()

@@ -16,6 +16,7 @@ class User:
         '''
         self.username = ''
         self.salted_password = ''
+        self.sskey = ''
         self.id = 0
         self.join_since = 0
         self.name = ''
@@ -29,7 +30,10 @@ class User:
             self.salted_password = salt_password(password)
             self.join_since = time.time()
             self.id = next_id()
-        
+    
+    def set_password(self, password):
+        self.salted_password = salt_password(password)
+    
     def write(self):
         _USER_CACHE[self.username] = self
         update_lookup_table()
