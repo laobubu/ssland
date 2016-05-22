@@ -22,7 +22,8 @@ class User:
         self.comment = ''
         if not type(src) in [str, unicode]:
             for k in self.__dict__.keys():
-                setattr(self, k, src[k])
+                if k in src:
+                    setattr(self, k, src[k])
         else:
             self.username = src
             self.salted_password = salt_password(password)
