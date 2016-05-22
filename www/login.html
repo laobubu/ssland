@@ -1,0 +1,17 @@
+% include('_header.html', title='Login')
+% setdefault('username', '')
+% setdefault('message',  '')
+
+<div class="wrapper">
+  <h1>SSUser</h1>
+  <form name="login" action="/login" method="POST">
+    <p><label>Username <input type="text" name="username" value="{{ username }}"></label></p>
+    <p><label>Password <input type="password" name="password"></label></p>
+    <p><input type="submit" value="Login"> {{ message }} </p>
+    <input type="hidden" name="md5ed" value="0">
+  </form>
+</div>
+
+<script> var SALT="{{ salt }}"; </script>
+
+% include('_footer.html')

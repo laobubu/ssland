@@ -1,0 +1,41 @@
+@charset "utf-8";
+
+html {
+    background-color: #eeeeee;
+    color: #303841;
+}
+
+* {
+    font-family: DejaVu Sans Mono, Monaco, Consolas, Courier New, Courier, monospace;
+}
+
+h1,h2,h3,h4,h5 {
+    font-weight: normal;
+}
+
+a {
+    color: #00adb5;
+}
+
+.wrapper {
+    max-width: 960px;
+    margin: auto;
+}
+
+input[type=text], input[type=password] {
+    border: 1px solid #303841;
+}
+
+button, input[type=submit] {
+    border: 0;
+    background-color: #303841;
+    padding: 5px 10px;
+    color: #eeeeee;
+    cursor: pointer;
+}
+
+button:hover, input[type=submit]:hover, 
+button:focus, input[type=submit]:focus 
+{
+    background-color: #3a4750;
+}

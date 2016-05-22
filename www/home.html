@@ -1,0 +1,14 @@
+% include('_header.html', title='Home')
+% setdefault('username', '')
+% setdefault('message',  '')
+
+<div class="wrapper">
+  <h1>Hello</h1>
+  <form action="/login" method="POST">
+    <p><label>Username <input type="text" name="username" value="{{ username }}"></label></p>
+    <p><label>Password <input type="password" name="password"></label></p>
+    <p><input type="submit" value="Login"> {{ message }} </p>
+  </form>
+</div>
+
+% include('_footer.html')
