@@ -7,6 +7,7 @@
         form.password.value = md5(form.password.value + SALT);
         form.md5ed.value=1;
     }
+    document.getElementById('md5alert').style.display = 'none';
 }(document.forms['login']);
 
 //----------------------------------------------------------

@@ -48,6 +48,7 @@ def open(username):
     '''
     Get an existing User() instance.
     '''
+    if not re.match(r'^[\w\-\.]+$', username): return None
     try:
         if not _USER_CACHE.has_key(username):
             f = file(user_filename(username), 'r')

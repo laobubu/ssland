@@ -8,6 +8,7 @@
     <p><label>Username <input type="text" name="username" value="{{ username }}"></label></p>
     <p><label>Password <input type="password" name="password"></label></p>
     <p><input type="submit" value="Login"> {{ message }} </p>
+    <p id="md5alert"><b>INSECURE!</b> Hashing system failed to load. Your password will be transferred as-is. Make sure you have enabled JavaScript.</p>
     <input type="hidden" name="md5ed" value="0">
   </form>
 </div>

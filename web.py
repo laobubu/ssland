@@ -13,6 +13,8 @@ from bottle import route, get, post, run, template, redirect, static_file, respo
 WEB_ROOT = config.WEB_ROOT
 bottle.TEMPLATE_PATH.insert(0, WEB_ROOT)
 
+bottle.debug(True)
+
 # FIXME: Use another graceful way to pass current_user to processors
 current_user = user.User({})
 
@@ -42,6 +44,12 @@ def require_login(func):
 def server_index():
     return template('home', user=current_user)
 
+@get('/logout')
+def logout():
+    response.set_cookie('ssl_un', '', expires=0)
+    response.set_cookie('ssl_pw', '', expires=0)
+    return redirect('/login')
+
 @get('/login')
 def login():
     return template('login', salt=config.USER_SALT)
@@ -64,7 +72,7 @@ def do_login():
     
     return template('login', 
         username=username, 
-        message=u'PASSWORD is ' + password, 
+        message='User not found.' if not current_user else 'Password is incorrect.', 
         salt=config.USER_SALT
     )
 
