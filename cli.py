@@ -19,6 +19,8 @@ Usage:
  user del {username}
  user passwd {username}
  user passwd {username} {password}
+ 
+ sys update
 ''')
     sys.exit(0)
 
@@ -47,3 +49,7 @@ if scope == 'user':
         u = user.open(username)
         u.set_password(password)
         u.write()
+elif scope == 'sys':
+    if   action == 'update':
+        import ssmgr
+        ssmgr.update_and_restart()

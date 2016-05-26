@@ -11,10 +11,23 @@ A lightweight Shadowsocks multi-user web-frontend.
 
 ### Install
 
+```bash
+#if you don't have shadowsocks
+sudo pip install shadowsocks
+
+git clone https://github.com/laobubu/ssland.git
+cd ssland
+pip install -r requirements.txt
+```
+
 ### Config
 
-Edit `config.py`
+Read <https://github.com/laobubu/ssland/wiki/Config>
 
-### Web
+### Use
 
-Visit your URL (eg. `http://xxx.yyy:8080`)
+These Python script are executable. You can run them:
+
+ - `web.py` start the web server, where user can modify their Shadowsocks configuration.
+ - `cli.py` add/modify/delete a user. After using this, you **must** restart `web.py` and run `cron.py`
+ - `cron.py` update Shadowsocks configration file and restart Shadowsocks.
