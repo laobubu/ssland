@@ -4,7 +4,12 @@
   <h1>Welcome back {{ user.username }}</h1>
   <p>Here is the configuration: </p>
   
-  <pre>SSCONFIG</pre>
+  <pre>Port: {{ config.user_port(user.id) }}
+Status: {{ "Active" if not user.suspended else "Suspended" }} 
+% if defined('message'):
+{{ message }}
+% end
+</pre>
   
   <h2>Edit</h2>
 
@@ -31,7 +36,7 @@
     <p id="md5alert"><b>INSECURE!</b> Hashing system failed to load. Your password will be transferred as-is. Make sure you have enabled JavaScript.</p>
   </form>
   
-  <p>Use different keyphase to keep safe.</p>
+  <p>Use different passphrase to keep safe.</p>
   
   <p>
     <a href="/logout">Logout</a>

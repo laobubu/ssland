@@ -21,6 +21,7 @@ class User:
         self.join_since = 0
         self.name = ''
         self.comment = ''
+        self.suspended = False
         if not type(src) in [str, unicode]:
             for k in self.__dict__.keys():
                 if k in src:

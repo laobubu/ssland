@@ -46,7 +46,7 @@ def passwd():
         password = user.salt_password(password)
     current_user.salted_password = password
     current_user.write()
-    return redirect('/')
+    return template('home', config=config, user=current_user)
 
 @post('/sskey')
 @require_login
@@ -54,7 +54,15 @@ def passwd():
     sskey = request.forms.get('sskey')
     current_user.sskey = sskey
     current_user.write()
-    return redirect('/')
+    
+    import cron;
+    cd = cron.start()
+    if cd <= 0.5:
+        msg = "Your Shadowsocks key is changed!"
+    else:
+        msg = "The Shadowsocks key will be changed in %.2f sec" % cd
+    
+    return template('home', config=config, user=current_user, message=msg)
 
 
 @route('/')
@@ -100,4 +108,4 @@ def do_login():
 def server_static(filename):
     return static_file(filename, root=WEB_ROOT+'/static')
 
-run(host='localhost', port=8080)
+run(host=config.WEB_HOST, port=config.WEB_PORT)
