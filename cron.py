@@ -68,7 +68,7 @@ if __name__ == "__main__":
         user.cache_all()
         ssmgr.update_and_restart()
     except:
-        print "Cannot update_and_restart SS."
+        print("Cannot update_and_restart SS.")
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback)
     
