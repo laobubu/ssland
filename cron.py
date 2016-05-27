@@ -64,6 +64,9 @@ if __name__ == "__main__":
     
     import traceback
     try:
+        cfgmtime = os.path.getmtime(config.SS_CONF)
+        usrmtime = os.path.getmtime(config.USER_ROOT)
+        assert(cfgmtime < usrmtime)
         import user, ssmgr
         user.cache_all()
         ssmgr.update_and_restart()
