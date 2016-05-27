@@ -18,6 +18,12 @@ sudo pip install shadowsocks
 git clone https://github.com/laobubu/ssland.git
 cd ssland
 pip install -r requirements.txt
+
+# Create the first user as the administrator
+./cli.py user add
+
+# Modify config.py
+# Then you can start web server now.
 ```
 
 ### Config

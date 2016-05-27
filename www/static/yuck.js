@@ -1,14 +1,27 @@
 "use strict";
 
-!function(form) {
-    if (!form) return;
-    form.onsubmit=function(){
-        if (!form.username.value || !form.password.value) return false;
-        form.password.value = md5(form.password.value + SALT);
-        form.md5ed.value=1;
+!function(forms) {
+    function md5_hook(e){
+        if (!this.username.value || !this.password.value) return false;
+        this.password.value = md5(this.password.value + SALT);
+        this.md5ed.value = 1;
     }
-    document.getElementById('md5alert').style.display = 'none';
-}(document.forms['login']);
+    var i = forms.length, f;
+    
+    while(i--) {
+        f = forms[i];
+        if (!f.md5ed) continue;
+        f.onsubmit = md5_hook;
+    }
+    if (f = document.getElementById('md5alert')) f.style.display = 'none';
+}(document.forms);
+
+function mod(fn, cel, user) {
+    var f = document.forms[fn];
+    f.username.value = user;
+    f[cel].focus();
+    return false;
+}
 
 //----------------------------------------------------------
 // md5() function

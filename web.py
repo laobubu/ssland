@@ -35,25 +35,37 @@ def require_login(func):
         return func(*args, **kwargs)
     return func_wrapper
 
+# get salted password from request.forms
+def get_salted_password():
+    password = request.forms.get('password')
+    if not (request.forms.get('md5ed') == '1' and re.match(r'^[a-f\d]{32}$', password)):
+        password = user.salt_password(password)
+    return password
 
 # Website
 
 @post('/passwd')
 @require_login
 def passwd():
-    password = request.forms.get('password')
-    if not (request.forms.get('md5ed') == '1' and re.match(r'^[a-f\d]{32}$', password)):
-        password = user.salt_password(password)
-    current_user.salted_password = password
-    current_user.write()
-    return template('home', config=config, user=current_user)
+    password = get_salted_password()
+    
+    u = current_user
+    if (u.id == 0): u = user.open(request.forms.get('username'))
+    
+    u.salted_password = password
+    u.write()
+    return redirect('/')
 
 @post('/sskey')
 @require_login
-def passwd():
+def sskey():
     sskey = request.forms.get('sskey')
-    current_user.sskey = sskey
-    current_user.write()
+    
+    u = current_user
+    if (u.id == 0): u = user.open(request.forms.get('username'))
+    
+    u.sskey = sskey
+    u.write()
     
     import cron;
     cd = cron.start()
@@ -62,13 +74,81 @@ def passwd():
     else:
         msg = "The Shadowsocks key will be changed in %.2f sec" % cd
     
-    return template('home', config=config, user=current_user, message=msg)
+    return template(
+        'home', 
+        config=config, 
+        user=current_user,
+        message=msg, 
+        users=(user._USER_CACHE if current_user.id == 0 else {})
+    )
 
+@post('/cli')
+@require_login
+def cli():
+    if (current_user.id != 0):
+        return redirect('/')
+    
+    argv = request.forms.get('cmd').split(' ')
+    import cli
+    cli.run(argv[0], argv[1], argv[2:])
+    
+    return template(
+        'home', 
+        config=config, 
+        user=current_user,
+        message="EXECUTED",
+        users=user._USER_CACHE
+    )
+
+@route('/updateServer')
+@require_login
+def updateServer():
+    if (current_user.id != 0):
+        return redirect('/')
+    
+    import cron;
+    cd = cron.start()
+    msg = "The Shadowsocks will be updated in %.2f sec" % cd
+    
+    return template(
+        'home', 
+        config=config, 
+        user=current_user,
+        message=msg, 
+        users=user._USER_CACHE
+    )
+
+@route('/suspend/<suspend>/<username>')
+@require_login
+def suspend(suspend, username):
+    if (current_user.id != 0):
+        return redirect('/')
+    
+    u = user.open(username)
+    u.suspended = suspend != "0"
+    u.write()
+    
+    msg = 'User %s status changed. Please click [Update SSConfig].' % username
+    return template(
+        'home', 
+        config=config, 
+        user=current_user,
+        message=msg, 
+        users=(user._USER_CACHE if current_user.id == 0 else {})
+    )
 
 @route('/')
 @require_login
 def server_index():
-    return template('home', config=config, user=current_user)
+    if (current_user.id == 0):
+        user.cache_all()
+        
+    return template(
+        'home', 
+        config=config, 
+        user=current_user,
+        users=(user._USER_CACHE if current_user.id == 0 else {})
+    )
 
 # Login and Logout
 
@@ -85,10 +165,7 @@ def login():
 @post('/login')
 def do_login():
     username = request.forms.get('username')
-    password = request.forms.get('password')
-    
-    if not (request.forms.get('md5ed') == '1' and re.match(r'^[a-f\d]{32}$', password)):
-        password = user.salt_password(password)
+    password = get_salted_password()
     
     current_user = user.open(username)
     logined = current_user and current_user.salted_password == password

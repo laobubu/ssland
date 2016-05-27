@@ -19,7 +19,8 @@ h1,h2,h3,h4,h5 {
 }
 
 a {
-    color: #00adb5;
+    color: #26a;
+    text-decoration: none;
 }
 
 .wrapper {
@@ -35,17 +36,47 @@ input[type=text], input[type=password] {
     padding: 5px 10px;
 }
 
-button, input[type=submit] {
+.button, button, input[type=submit] {
     border: 0;
     background-color: #303841;
     padding: 5px 10px;
     color: #eeeeee;
     cursor: pointer;
     vertical-align: middle;
+    display: inline-block;
+    font-size: 0.87em;
 }
 
+.button:hover,.button:focus,
 button:hover, input[type=submit]:hover, 
 button:focus, input[type=submit]:focus 
 {
     background-color: #3a4750;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+#admin-table {
+    width: 100%;
+    border: 0;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+#admin-table tr {
+    text-align: left;
+    padding: 5px;
+}
+
+#admin-table tr:nth-child(2n+1) {
+    background-color: #F9F9F9;
+}
+
+#admin-table th, #admin-table td {
+    padding: 5px 10px;
+}
+
+#clicmd {
+    width: 100%;
+    box-sizing: border-box;
 }
