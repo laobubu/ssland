@@ -9,6 +9,7 @@ import config, time, os, sys
 from subprocess import Popen
 
 TIME_FILE = config.TMP_ROOT + "/ssland.cron.ts"   # next avaliable time
+FLAG_FILE = config.TMP_ROOT + "/ssland.cron.rst"  # a flag file for "update config and restart SS"
 PID_FILE  = config.TMP_ROOT + "/ssland.cron.pid"  # current running item pid
 
 def get_cd():
@@ -45,6 +46,8 @@ def start():
     '''
     cd = get_cd()
     
+    open(FLAG_FILE, 'a').close()
+    
     try: # if the cron is already running, just return CD time.
         pid = int(open(PID_FILE, 'r').read())
         os.kill(pid, 0)
@@ -62,15 +65,22 @@ if __name__ == "__main__":
     cd = get_cd()
     time.sleep(cd)
     
-    import traceback
-    try:
-        import user, ssmgr
-        user.cache_all()
-        ssmgr.update_and_restart()
-    except:
-        print("Cannot update_and_restart SS.")
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback)
+    # use -f argument to forcly update configuration and restart Shadowsocks 
+    restart_ss = "-f" in sys.argv
+    if os.path.isfile(FLAG_FILE):
+        restart_ss = True
+        os.remove(FLAG_FILE)
+        
+    if restart_ss:
+        import traceback
+        try:
+            import user, ssmgr
+            user.cache_all()
+            ssmgr.update_and_restart()
+        except:
+            print("Cannot update_and_restart SS.")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
     
     update_cd()
     os.remove(PID_FILE)
