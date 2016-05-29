@@ -12,7 +12,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
 % end
 </pre>
   
-% if user.id == 0:
+% if user.id == config.USER_ADMIN:
   
   <h2>Administrator</h2>
   
@@ -36,8 +36,8 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
       </tr>
     </thead>
     <tbody>
-% for u in users:
-% n = u.username
+  % for u in users:
+  % n = u.username
       <tr>
         <td>{{ n }}{{ "(suspended)" if u.suspended else "" }}</td>
         <td>{{ config.user_port(u.id) }}</td>
@@ -48,7 +48,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
           <a href="/suspend/{{ 0 if u.suspended else 1 }}/{{ n }}">[{{ "suspend" if not u.suspended else "unsuspend" }}]</a>
         </td>
       </tr>
-% end
+  % end
     </tbody>
   </table>
   
@@ -63,7 +63,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
         <input type="text" name="sskey" value="{{ user.sskey }}">
       </label>
       <input type="submit" value="Modify">
-      <input type="{{ 'text' if user.id == 0 else 'hidden' }}" name="username" value="{{ user.username }}">
+      <input type="{{ 'text' if user.id == config.USER_ADMIN else 'hidden' }}" name="username" value="{{ user.username }}">
     </p>
   </form>
   
@@ -74,7 +74,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
         <input type="password" name="password">
       </label>
       <input type="submit" value="Modify">
-      <input type="{{ 'text' if user.id == 0 else 'hidden' }}" name="username" value="{{ user.username }}">
+      <input type="{{ 'text' if user.id == config.USER_ADMIN else 'hidden' }}" name="username" value="{{ user.username }}">
     </p>
     <input type="hidden" name="md5ed" value="0">
     <p id="md5alert"><b>INSECURE!</b> Hashing system failed to load. Your password will be transferred as-is. Make sure you have enabled JavaScript.</p>
