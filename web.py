@@ -182,4 +182,54 @@ def do_login():
 def server_static(filename):
     return static_file(filename, root=WEB_ROOT+'/static')
 
-run(host=config.WEB_HOST, port=config.WEB_PORT)
+if __name__ == "__main__":
+    import argparse, os, signal
+    parser = argparse.ArgumentParser(description='SSLand Web Server')
+    parser.add_argument('-d', '--daemon',  action='store', required=False, help="Control web server daemon")
+    flags = parser.parse_args(sys.argv[1:])
+    
+    DAEMON_PID_FILE = config.TMP_ROOT + "/ssland.web.pid"
+    
+    if flags.daemon in ('stop', 'restart'):
+        try:
+            with open(DAEMON_PID_FILE, 'r') as f:
+                pid = int(f.read())
+                os.kill(pid, signal.SIGTERM)
+            os.remove(DAEMON_PID_FILE)
+        except:
+            pass
+    
+    if flags.daemon in ('start', 'restart'):
+        try:
+            with open(DAEMON_PID_FILE, 'r') as f:
+                pid = int(f.read())
+                os.kill(pid, 0)
+                print("Already running daemon with PID %d" % pid)
+                sys.exit(0)
+                # Already running one. Do nothing
+        except:
+            # Thread not found. Create
+            pid = os.fork()
+            assert pid != -1
+            if pid > 0:
+                # parent waits for its child
+                time.sleep(5)
+                sys.exit(0)
+                
+            # child signals its parent to exit
+            ppid = os.getppid()
+            pid = os.getpid()
+            
+            with open(DAEMON_PID_FILE, 'w') as f:
+                f.write(str(pid))
+            
+            os.setsid()
+            signal.signal(signal.SIGHUP, signal.SIG_IGN)
+            
+            print("Daemon running, PID %d" % pid)
+            os.kill(ppid, signal.SIGTERM)
+            
+            sys.stdin.close()
+            #TODO: Output log
+    
+    run(host=config.WEB_HOST, port=config.WEB_PORT)
