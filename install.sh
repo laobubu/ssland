@@ -8,7 +8,7 @@ type ssserver >/dev/null 2>&1 || { pip install shadowsocks; }
 
 pip install -r requirements.txt
 
-if (grep WIZARD_GENERATED config.py >/dev/null); then
+if grep -q WIZARD_GENERATED config.py; then
 
     echo "Found WIZARD_GENERATED mark. Skipping wizard."
 
@@ -38,4 +38,26 @@ else
 fi
 
 echo "Update and start Shadowsocks."
-./cli.py sys update
+./cli.py sys update 2>&1 >/dev/null
+
+function confirm() {
+    while true; do
+        read -p "$*? (yes/no): " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+}
+
+# CRONJOB Install
+    CRONFILE=/tmp/ssland.cron.tmp
+    EXECCMD="`readlink -f cron.py` -s"
+    crontab -l >$CRONFILE
+    if confirm Install cronjob and enable traffic statistic
+        grep -q "$EXECCMD" $CRONFILE || ({ cat $CRONFILE; echo "59 23 * * * $EXECCMD"; } | crontab -)
+    else
+        grep -v "$EXECCMD" $CRONFILE | crontab -
+    fi
+    rm -f $CRONFILE
