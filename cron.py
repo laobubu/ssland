@@ -57,6 +57,18 @@ def start():
     return cd
 
 if __name__ == "__main__":
+    if "-h" in sys.argv:
+      print('''
+  SSLand cronjob script
+  
+    Update statistic, account status and Shadowsocks config.
+  
+  Usage:
+  
+    [-f]        Forcibly update and restart Shadowsocks.
+      ''')
+      sys.exit(0)
+    
     # Execute Cronjob tasks
     pid = os.getpid()
     with open(PID_FILE, 'w') as f:

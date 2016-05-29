@@ -27,7 +27,15 @@ def install():
         `since`	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         `suspended`	BOOLEAN,
         `meta`	TEXT
-    );''')
+    )''')
+    
+    c.execute(
+    '''CREATE TABLE IF NOT EXISTS `traffic` (
+        `user`	INTEGER,
+        `packages`	NUMERIC,
+        `traffic`	NUMERIC,
+        `time`	TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
     
     c.close()
 
