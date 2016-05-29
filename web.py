@@ -16,20 +16,20 @@ bottle.TEMPLATE_PATH.insert(0, WEB_ROOT)
 bottle.debug(True)
 
 # FIXME: Use another graceful way to pass current_user to processors
-current_user = user.User({})
+current_user = user.User()
 
 # decorator that used for login_only pages
 def require_login(func):
     def func_wrapper(*args, **kwargs):
         global current_user
-        username = request.get_cookie('ssl_un')
+        uid_str = request.get_cookie('ssl_uid')
         password = request.get_cookie('ssl_pw')
-        logined = username and password
+        logined = uid_str and password
         if logined:
-            current_user = user.open(username)
+            current_user = user.get_by_id(int(uid_str))
             logined = current_user and current_user.salted_password == password
         if not logined:
-            response.set_cookie('ssl_un', '', expires=0)
+            response.set_cookie('ssl_uid', '', expires=0)
             response.set_cookie('ssl_pw', '', expires=0)
             return redirect('/login')
         return func(*args, **kwargs)
@@ -50,7 +50,7 @@ def passwd():
     password = get_salted_password()
     
     u = current_user
-    if (u.id == 0): u = user.open(request.forms.get('username'))
+    if (u.id == config.USER_ADMIN): u = user.get_by_username(request.forms.get('username'))
     
     u.salted_password = password
     u.write()
@@ -62,7 +62,7 @@ def sskey():
     sskey = request.forms.get('sskey')
     
     u = current_user
-    if (u.id == 0): u = user.open(request.forms.get('username'))
+    if (u.id == config.USER_ADMIN): u = user.get_by_username(request.forms.get('username'))
     
     u.sskey = sskey
     u.write()
@@ -79,13 +79,13 @@ def sskey():
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 @post('/cli')
 @require_login
 def cli():
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
     argv = request.forms.get('cmd').split(' ')
@@ -97,13 +97,13 @@ def cli():
         config=config, 
         user=current_user,
         message="EXECUTED",
-        users=user._USER_CACHE
+        users=user.get_all()
     )
 
 @route('/updateServer')
 @require_login
 def updateServer():
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
     import cron;
@@ -115,16 +115,16 @@ def updateServer():
         config=config, 
         user=current_user,
         message=msg, 
-        users=user._USER_CACHE
+        users=user.get_all()
     )
 
 @route('/suspend/<suspend>/<username>')
 @require_login
 def suspend(suspend, username):
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
-    u = user.open(username)
+    u = user.get_by_username(username)
     u.suspended = suspend != "0"
     u.write()
     
@@ -134,27 +134,24 @@ def suspend(suspend, username):
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 @route('/')
 @require_login
 def server_index():
-    if (current_user.id == 0):
-        user.cache_all()
-        
     return template(
         'home', 
         config=config, 
         user=current_user,
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 # Login and Logout
 
 @get('/logout')
 def logout():
-    response.set_cookie('ssl_un', '', expires=0)
+    response.set_cookie('ssl_uid', '', expires=0)
     response.set_cookie('ssl_pw', '', expires=0)
     return redirect('/login')
 
@@ -167,11 +164,11 @@ def do_login():
     username = request.forms.get('username')
     password = get_salted_password()
     
-    current_user = user.open(username)
+    current_user = user.get_by_username(username)
     logined = current_user and current_user.salted_password == password
     
     if logined:
-        response.set_cookie('ssl_un', username)
+        response.set_cookie('ssl_uid', str(current_user.id))
         response.set_cookie('ssl_pw', password)
         return redirect('/')
     
@@ -185,4 +182,80 @@ def do_login():
 def server_static(filename):
     return static_file(filename, root=WEB_ROOT+'/static')
 
-run(host=config.WEB_HOST, port=config.WEB_PORT)
+if __name__ == "__main__":
+    import argparse, os, sys, time, signal
+    parser = argparse.ArgumentParser(description='SSLand Web Server')
+    parser.add_argument('-d', '--daemon',  action='store', required=False, help="Control web server daemon")
+    flags = parser.parse_args(sys.argv[1:])
+    
+    DAEMON_PID_FILE = config.TMP_ROOT + "/ssland.web.pid"
+    
+    if flags.daemon in ('stop', 'restart'):
+        try:
+            with open(DAEMON_PID_FILE, 'r') as f:
+                pid = int(f.read())
+                os.kill(pid, signal.SIGTERM)
+            os.remove(DAEMON_PID_FILE)
+        except:
+            pass
+        if flags.daemon == 'stop': sys.exit(0)
+    
+    if flags.daemon in ('start', 'restart'):
+        
+        def freopen(f, mode, stream):
+            oldf = open(f, mode)
+            oldfd = oldf.fileno()
+            newfd = stream.fileno()
+            os.close(newfd)
+            os.dup2(oldfd, newfd)
+            
+        def handle_exit(signum, _):
+            if signum == signal.SIGTERM:
+                sys.exit(0)
+            sys.exit(1)
+        signal.signal(signal.SIGINT, handle_exit)
+        signal.signal(signal.SIGTERM, handle_exit)
+        
+        already_running=False
+        try:
+            with open(DAEMON_PID_FILE, 'r') as f:
+                pid = int(f.read())
+                os.kill(pid, 0)
+                print("Already running daemon with PID %d" % pid)
+                already_running=True
+        except:
+            pass
+            
+        if already_running:
+            sys.exit(0)
+        else:
+            # Thread not found. Create
+            pid = os.fork()
+            assert pid != -1
+            if pid > 0:
+                # parent waits for its child
+                time.sleep(5)
+                sys.exit(0)
+                
+            # child signals its parent to exit
+            ppid = os.getppid()
+            pid = os.getpid()
+            
+            with open(DAEMON_PID_FILE, 'w') as f:
+                f.write(str(pid))
+            
+            os.setsid()
+            signal.signal(signal.SIGHUP, signal.SIG_IGN)
+            
+            print("Daemon running, PID %d" % pid)
+            os.kill(ppid, signal.SIGTERM)
+            
+            sys.stdin.close()
+            try:
+                log_file = "/var/log/ssland.web.log"
+                freopen(log_file, 'a', sys.stdout)
+                freopen(log_file, 'a', sys.stderr)
+            except:
+                pass
+    
+    run(host=config.WEB_HOST, port=config.WEB_PORT)

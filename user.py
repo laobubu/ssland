@@ -7,90 +7,91 @@
 
 import re, os, json, time
 import config
+import database
 from hashlib import md5
 
+cursor = database.conn.cursor()
+
 class User:
-    def __init__(self, src, password=None):
+    def __init__(self, dbRow=None):
         '''
         Create one User instance from a Dict or String object.
         '''
+        self.id = -1
         self.username = ''
         self.salted_password = ''
         self.sskey = ''
-        self.id = 0
-        self.join_since = 0
-        self.name = ''
-        self.comment = ''
+        self.since = 0
         self.suspended = False
-        if not type(src) in [str, unicode]:
-            for k in self.__dict__.keys():
-                if k in src:
-                    setattr(self, k, src[k])
-        else:
-            self.username = src
-            self.salted_password = salt_password(password)
-            self.join_since = time.time()
-            self.id = next_id()
+        self.meta = {}
+        if dbRow:
+            [self.id, self.username, self.salted_password, self.sskey, self.since, self.suspended, meta] = dbRow
+            self.meta = json.loads(meta)
     
+    def create(self):
+        if self.id == -1:
+            cursor.execute('INSERT INTO user (username, password, sskey, meta) VALUES ("", "", "", "{}")')
+            self.id = cursor.lastrowid
+        return self.id
+    
+    def get_meta(self, name, default_value=None):
+        try:
+            return self.meta[name]
+        except:
+            return default_value
+            
+    def set_meta(self, name, value):
+        self.meta[name] = value
+        
     def set_password(self, password):
         self.salted_password = salt_password(password)
     
+    def read(self):
+        dc = cursor.execute('SELECT * FROM user WHERE id = %d' % self.id).fetchall()
+        if len(dc) == 1:
+            User.__init__(self, dc[0])
+    
     def write(self):
-        _USER_CACHE[self.username] = self
-        update_lookup_table()
-        f = file(user_filename(self.username), 'w')
-        json.dump(self.__dict__, f)
-        f.close()
+        cursor.execute('UPDATE user SET username=?, password=?, sskey=?, since=?, suspended=?, meta=? WHERE id = ?',
+        (
+            self.username, self.salted_password, self.sskey, self.since, (1 if self.suspended else 0), json.dumps(self.meta), self.id
+        ))
+        database.conn.commit()
+    
+    def delete(self):
+        cursor.execute('DELETE FROM user WHERE id = %d' % self.id)
+        database.conn.commit()
 
+def get_by_username(username):
+    if not is_good_username(username): return None
+    dc = cursor.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchall()
+    if len(dc) == 0: return None
+    return User(dc[0])
+
+def get_by_id(id):
+    dc = cursor.execute('SELECT * FROM user WHERE id = %d' % id).fetchall()
+    if len(dc) == 0: return None
+    return User(dc[0])
+    
+def get_all():
+    dc = cursor.execute('SELECT * FROM user').fetchall()
+    return [User(row) for row in dc]
+
+def delete_users(*username):
+    if len(username) <= 0: return
+    query = 'DELETE FROM user WHERE username IN %s' % str(username)
+    if query[-2:] == ',)': query = query[:-2] + ')'
+    cursor.execute(query)
+    database.conn.commit()
+
+def batch_update(*usernames, **dict):
+    if len(usernames) <= 0: return
+    qdata = ', '.join(["%s=:%s"%(id,id) for id in dict.keys()])
+    qwhere = 'WHERE username IN %s' % str(usernames)
+    if qwhere[-2:] == ',)': qwhere = qwhere[:-2] + ')'
+    query = 'UPDATE user SET %s %s' % (qdata, qwhere)
+    cursor.execute(query, dict)
+    database.conn.commit()
+
+is_good_username = lambda username: re.match(r'^[\w\-\.]+$', username)
 salt_password = lambda password: md5(password + config.USER_SALT).hexdigest()
-user_filename = lambda username: config.USER_ROOT + '/' + username + '.json'
-
-# Every user info will be cached here to reduce harddisk IO
-_USER_CACHE = {}
-_USER_CACHE_ID = {}
-
-def open(username):
-    '''
-    Get an existing User() instance.
-    '''
-    if not re.match(r'^[\w\-\.]+$', username): return None
-    try:
-        if not _USER_CACHE.has_key(username):
-            f = file(user_filename(username), 'r')
-            j = json.load(f)
-            u = User(j)
-            _USER_CACHE[username] = u
-            f.close()
-        return _USER_CACHE[username]
-    except:
-        return None
-
-def cache_all():
-    '''
-    Load and cache all existing user files. 
-    '''
-    for fn in os.listdir(config.USER_ROOT):
-        if fn[-5:] == '.json':
-            open(fn[:-5])
-    update_lookup_table()
-
-def update_lookup_table():
-    '''
-    Update ID -> User lookup table.
-    '''
-    global _USER_CACHE_ID
-    _USER_CACHE_ID = {}
-    for i in _USER_CACHE:
-        u = _USER_CACHE[i]
-        _USER_CACHE_ID[u.id] = u
-
-def next_id():
-    '''
-    Get next avaliable ID.
-    '''
-    ids = _USER_CACHE_ID.keys()
-    ids.sort()
-    l = len(ids)
-    for i in range(l):
-        if ids[i] > i: return i
-    return l

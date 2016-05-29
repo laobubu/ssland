@@ -18,6 +18,8 @@ def print_help():
     user add {username} {password}
     user add {username} {password} {sskey}
     user del {username}
+    user suspend {username}
+    user unsuspend {username}
     user passwd {username}
     user passwd {username} {password}
     user sskey {username}
@@ -29,36 +31,58 @@ def print_help():
 
 def run(scope, action, argv):
     if scope == 'user':
-        user.cache_all();
         if   action == 'list':
-            for un in user._USER_CACHE.keys():
-                print(un)
+            print("id\tusername\tsuspended\tport\tsskey")
+            for u in user.get_all():
+                print('\t'.join(( str(item) for item in 
+                    (u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey)
+                )))
         elif action == 'add':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
             sskey    = argv[2] if len(argv) > 2 else getpass.getpass('Shadowsocks Key: ')
-            u = user.User(username, password)
+            u = user.User()
+            u.username = username
+            u.set_password(password)
             u.sskey = sskey
+            u.create()
             u.write()
         elif action == 'del':
-            for un in argv:
-                os.remove(user.user_filename(un))
+            user.delete_users(*argv)
+        elif action in ['suspend', 'unsuspend']:
+            user.batch_update(*argv, suspended=(1 if action == 'suspend' else 0))
         elif action == 'passwd':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
-            u = user.open(username)
+            u = user.get_by_username(username)
             u.set_password(password)
             u.write()
         elif action == 'sskey':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
-            sskey    = argv[1] if len(argv) > 1 else getpass.getpass('Shadowsocks Key: ')
-            u = user.open(username)
+            sskey    = argv[1] if len(argv) > 1 else raw_input('Shadowsocks Key: ')
+            u = user.get_by_username(username)
             u.sskey = sskey
             u.write()
+        else:
+            print_help()
     elif scope == 'sys':
         if   action == 'update':
             import ssmgr
             ssmgr.update_and_restart()
+            
+            try:
+                import os
+                with open(config.TMP_ROOT + "/ssland.web.pid", 'r') as f:
+                    pid = int(f.read())
+                    os.kill(pid, 0)
+                    from utils import get_stdout
+                    get_stdout(["./web.py", "-d", "restart"])
+            except:
+                pass
+        else:
+            print_help()
+    else:
+        print_help()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

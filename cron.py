@@ -9,6 +9,7 @@ import config, time, os, sys
 from subprocess import Popen
 
 TIME_FILE = config.TMP_ROOT + "/ssland.cron.ts"   # next avaliable time
+FLAG_FILE = config.TMP_ROOT + "/ssland.cron.rst"  # a flag file for "update config and restart SS"
 PID_FILE  = config.TMP_ROOT + "/ssland.cron.pid"  # current running item pid
 
 def get_cd():
@@ -45,6 +46,8 @@ def start():
     '''
     cd = get_cd()
     
+    open(FLAG_FILE, 'a').close()
+    
     try: # if the cron is already running, just return CD time.
         pid = int(open(PID_FILE, 'r').read())
         os.kill(pid, 0)
@@ -54,23 +57,41 @@ def start():
     return cd
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Update statistic, account status and Shadowsocks config.')
+    parser.add_argument('-i', '--instant', action='store_true',  help="Don't wait for the cool-down time.")
+    parser.add_argument('-s', '--stat',    action='store_true',  help="Update traffic statistic.")
+    parser.add_argument('-f', '--force',   action='store_true',  help="Forcibly update and restart Shadowsocks.")
+    flags = parser.parse_args(sys.argv[1:])
+    
     # Execute Cronjob tasks
     pid = os.getpid()
     with open(PID_FILE, 'w') as f:
         f.write(str(pid))
     
-    cd = get_cd()
-    time.sleep(cd)
+    if flags.stat:
+        import traffic
+        traffic.stat()
     
-    import traceback
-    try:
-        import user, ssmgr
-        user.cache_all()
-        ssmgr.update_and_restart()
-    except:
-        print("Cannot update_and_restart SS.")
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback)
+    if flags.instant:
+        cd = get_cd()
+        time.sleep(cd)
+    
+    # use -f argument to forcly update configuration and restart Shadowsocks 
+    restart_ss = flags.force
+    if os.path.isfile(FLAG_FILE):
+        restart_ss = True
+        os.remove(FLAG_FILE)
+        
+    if restart_ss:
+        import traceback
+        try:
+            import ssmgr
+            ssmgr.update_and_restart()
+        except:
+            print("Cannot update_and_restart SS.")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
     
     update_cd()
     os.remove(PID_FILE)

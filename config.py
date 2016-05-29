@@ -7,10 +7,15 @@
 from tempfile import gettempdir
 
 # Your Shadowsocks Path
+#  SS_EXEC     - The full command starting ssserver, without "-d start".
+#  SS_CONF     - The Shadowsocks config file which SSLand will manage.
 SS_EXEC = ["sudo", "ssserver", "-c", "/etc/ss.conf"]
 SS_CONF = "/etc/ss.conf"
 
-# User account password hashing salt. Make it complex :)
+# User Configuration
+#  USER_ADMIN  - Administrator user ID. Ususally the first user, whose id is 1.
+#  USER_SALT   - Account password hashing salt. Make it complex :)
+USER_ADMIN = 1
 USER_SALT = "~amADmANiNabLUEbOX!"
 
 # The formular to generate User Shadowsocks Port
