@@ -59,7 +59,7 @@ def run(scope, action, argv):
             u.write()
         elif action == 'sskey':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
-            sskey    = argv[1] if len(argv) > 1 else getpass.getpass('Shadowsocks Key: ')
+            sskey    = argv[1] if len(argv) > 1 else raw_input('Shadowsocks Key: ')
             u = user.get_by_username(username)
             u.sskey = sskey
             u.write()
