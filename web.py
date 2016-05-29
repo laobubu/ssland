@@ -183,7 +183,7 @@ def server_static(filename):
     return static_file(filename, root=WEB_ROOT+'/static')
 
 if __name__ == "__main__":
-    import argparse, os, sys, signal
+    import argparse, os, sys, time, signal
     parser = argparse.ArgumentParser(description='SSLand Web Server')
     parser.add_argument('-d', '--daemon',  action='store', required=False, help="Control web server daemon")
     flags = parser.parse_args(sys.argv[1:])
@@ -198,6 +198,7 @@ if __name__ == "__main__":
             os.remove(DAEMON_PID_FILE)
         except:
             pass
+        sys.exit(0)
     
     if flags.daemon in ('start', 'restart'):
         try:
