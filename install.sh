@@ -23,9 +23,13 @@ else
 
     read -p "User port formular [ default: 6580+id ] = " port
     port=${port:-6580+id}
+    
+    read -p "SSLand web port [ default: 8080 ] = " wport
+    wport=${wport:-8080}
 
     sed config.py -r -i                                             \
         -e "s|^USER_SALT.+$|USER_SALT='`openssl rand -base64 16`'|" \
+        -e "s|^WEB_PORT .+$|WEB_PORT=${wport}|"                     \
         -e "s|^user_port.+$|user_port=lambda id:${port}|"           \
         -e "s|/etc/ss.conf|${cfg}|"                                 \
         -e "7a# WIZARD_GENERATED = '`date`'"
