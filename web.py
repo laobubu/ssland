@@ -183,7 +183,7 @@ def server_static(filename):
     return static_file(filename, root=WEB_ROOT+'/static')
 
 if __name__ == "__main__":
-    import argparse, os, signal
+    import argparse, os, sys, signal
     parser = argparse.ArgumentParser(description='SSLand Web Server')
     parser.add_argument('-d', '--daemon',  action='store', required=False, help="Control web server daemon")
     flags = parser.parse_args(sys.argv[1:])
