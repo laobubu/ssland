@@ -73,6 +73,6 @@ function confirm() {
     ./web.py -d restart
     
     echo "Update and start Shadowsocks."
-    ./cli.py sys update
+    (cd /tmp && nohup ./cli.py sys update </dev/null >/dev/null 2>&1 &)
     
-    sleep 1 && echo "Everything shall be ok now. Thanks for using SSLand."
+    echo "Everything shall be ok now. Thanks for using SSLand."

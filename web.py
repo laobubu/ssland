@@ -198,7 +198,7 @@ if __name__ == "__main__":
             os.remove(DAEMON_PID_FILE)
         except:
             pass
-        sys.exit(0)
+        if flags.daemon == 'stop': sys.exit(0)
     
     if flags.daemon in ('start', 'restart'):
         already_running=False
