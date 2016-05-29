@@ -69,6 +69,15 @@ def run(scope, action, argv):
         if   action == 'update':
             import ssmgr
             ssmgr.update_and_restart()
+            
+            try:
+                with open(config.TMP_ROOT + "/ssland.web.pid", 'r') as f:
+                    pid = int(f.read())
+                    os.kill(pid, 0)
+                    from utils import get_stdout
+                    get_stdout(["./web.py", "-d", "restart"])
+            except:
+                pass
         else:
             print_help()
     else:
