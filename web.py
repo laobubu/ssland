@@ -50,7 +50,7 @@ def passwd():
     password = get_salted_password()
     
     u = current_user
-    if (u.id == 0): u = user.get_by_username(request.forms.get('username'))
+    if (u.id == config.USER_ADMIN): u = user.get_by_username(request.forms.get('username'))
     
     u.salted_password = password
     u.write()
@@ -62,7 +62,7 @@ def sskey():
     sskey = request.forms.get('sskey')
     
     u = current_user
-    if (u.id == 0): u = user.get_by_username(request.forms.get('username'))
+    if (u.id == config.USER_ADMIN): u = user.get_by_username(request.forms.get('username'))
     
     u.sskey = sskey
     u.write()
@@ -79,13 +79,13 @@ def sskey():
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user.get_all() if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 @post('/cli')
 @require_login
 def cli():
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
     argv = request.forms.get('cmd').split(' ')
@@ -103,7 +103,7 @@ def cli():
 @route('/updateServer')
 @require_login
 def updateServer():
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
     import cron;
@@ -121,7 +121,7 @@ def updateServer():
 @route('/suspend/<suspend>/<username>')
 @require_login
 def suspend(suspend, username):
-    if (current_user.id != 0):
+    if (current_user.id != config.USER_ADMIN):
         return redirect('/')
     
     u = user.get_by_username(username)
@@ -134,7 +134,7 @@ def suspend(suspend, username):
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user.get_all() if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 @route('/')
@@ -144,7 +144,7 @@ def server_index():
         'home', 
         config=config, 
         user=current_user,
-        users=(user.get_all() if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == config.USER_ADMIN else {})
     )
 
 # Login and Logout
