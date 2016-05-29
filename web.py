@@ -236,6 +236,11 @@ if __name__ == "__main__":
             os.kill(ppid, signal.SIGTERM)
             
             sys.stdin.close()
-            #TODO: Output log
+            try:
+                log_file = "/var/log/ssland.web.log"
+                freopen(log_file, 'a', sys.stdout)
+                freopen(log_file, 'a', sys.stderr)
+            except:
+                pass
     
     run(host=config.WEB_HOST, port=config.WEB_PORT)
