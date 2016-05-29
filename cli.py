@@ -59,10 +59,16 @@ def run(scope, action, argv):
             u = user.get_by_username(username)
             u.sskey = sskey
             u.write()
+        else:
+            print_help()
     elif scope == 'sys':
         if   action == 'update':
             import ssmgr
             ssmgr.update_and_restart()
+        else:
+            print_help()
+    else:
+        print_help()
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
