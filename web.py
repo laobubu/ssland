@@ -201,6 +201,21 @@ if __name__ == "__main__":
         if flags.daemon == 'stop': sys.exit(0)
     
     if flags.daemon in ('start', 'restart'):
+        
+        def freopen(f, mode, stream):
+            oldf = open(f, mode)
+            oldfd = oldf.fileno()
+            newfd = stream.fileno()
+            os.close(newfd)
+            os.dup2(oldfd, newfd)
+            
+        def handle_exit(signum, _):
+            if signum == signal.SIGTERM:
+                sys.exit(0)
+            sys.exit(1)
+        signal.signal(signal.SIGINT, handle_exit)
+        signal.signal(signal.SIGTERM, handle_exit)
+        
         already_running=False
         try:
             with open(DAEMON_PID_FILE, 'r') as f:
