@@ -13,7 +13,7 @@ from bottle import route, get, post, run, template, redirect, static_file, respo
 WEB_ROOT = config.WEB_ROOT
 bottle.TEMPLATE_PATH.insert(0, WEB_ROOT)
 
-bottle.debug(True)
+# bottle.debug(True)
 
 # FIXME: Use another graceful way to pass current_user to processors
 current_user = user.User()
