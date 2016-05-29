@@ -71,6 +71,7 @@ def run(scope, action, argv):
             ssmgr.update_and_restart()
             
             try:
+                import os
                 with open(config.TMP_ROOT + "/ssland.web.pid", 'r') as f:
                     pid = int(f.read())
                     os.kill(pid, 0)
