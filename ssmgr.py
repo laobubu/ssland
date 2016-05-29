@@ -13,7 +13,6 @@ import user
 def update_conf():
     '''
     Update Shadowsocks Config file.
-    NOTICE! Before using this, call user.cache_all()
     '''
     try:
         j = json.load(open(config.SS_CONF, 'r'))
@@ -34,7 +33,6 @@ def update_conf():
 def update_and_restart():
     '''
     Update Shadowsocks Config file, then restart shadowsocks.
-    NOTICE! Before using this, call user.cache_all()
     '''
     update_conf()
     Popen(config.SS_EXEC + ["-d", "restart"])

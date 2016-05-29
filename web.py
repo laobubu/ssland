@@ -22,14 +22,14 @@ current_user = user.User()
 def require_login(func):
     def func_wrapper(*args, **kwargs):
         global current_user
-        username = request.get_cookie('ssl_un')
+        uid_str = request.get_cookie('ssl_uid')
         password = request.get_cookie('ssl_pw')
-        logined = username and password
+        logined = uid_str and password
         if logined:
-            current_user = user.get_by_username(username)
+            current_user = user.get_by_id(int(uid_str))
             logined = current_user and current_user.salted_password == password
         if not logined:
-            response.set_cookie('ssl_un', '', expires=0)
+            response.set_cookie('ssl_uid', '', expires=0)
             response.set_cookie('ssl_pw', '', expires=0)
             return redirect('/login')
         return func(*args, **kwargs)
@@ -140,9 +140,6 @@ def suspend(suspend, username):
 @route('/')
 @require_login
 def server_index():
-    if (current_user.id == 0):
-        user.cache_all()
-        
     return template(
         'home', 
         config=config, 
@@ -154,7 +151,7 @@ def server_index():
 
 @get('/logout')
 def logout():
-    response.set_cookie('ssl_un', '', expires=0)
+    response.set_cookie('ssl_uid', '', expires=0)
     response.set_cookie('ssl_pw', '', expires=0)
     return redirect('/login')
 
@@ -171,7 +168,7 @@ def do_login():
     logined = current_user and current_user.salted_password == password
     
     if logined:
-        response.set_cookie('ssl_un', username)
+        response.set_cookie('ssl_uid', str(current_user.id))
         response.set_cookie('ssl_pw', password)
         return redirect('/')
     

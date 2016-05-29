@@ -31,8 +31,10 @@ def run(scope, action, argv):
     if scope == 'user':
         if   action == 'list':
             print("id\tusername\tsuspended\tport\tsskey")
-            for u in user.get_all()
-                print('\t'.join(u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey))
+            for u in user.get_all():
+                print('\t'.join(( str(item) for item in 
+                    (u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey)
+                )))
         elif action == 'add':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
@@ -41,9 +43,10 @@ def run(scope, action, argv):
             u.username = username
             u.set_password(password)
             u.sskey = sskey
+            u.create()
             u.write()
         elif action == 'del':
-            user.delete_users(argv)
+            user.delete_users(*argv)
         elif action == 'passwd':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
