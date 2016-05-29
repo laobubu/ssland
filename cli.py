@@ -18,6 +18,8 @@ def print_help():
     user add {username} {password}
     user add {username} {password} {sskey}
     user del {username}
+    user suspend {username}
+    user unsuspend {username}
     user passwd {username}
     user passwd {username} {password}
     user sskey {username}
@@ -47,6 +49,8 @@ def run(scope, action, argv):
             u.write()
         elif action == 'del':
             user.delete_users(*argv)
+        elif action in ['suspend', 'unsuspend']:
+            user.batch_update(*argv, suspended=(1 if action == 'suspend' else 0))
         elif action == 'passwd':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()

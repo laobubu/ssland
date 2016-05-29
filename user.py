@@ -84,5 +84,14 @@ def delete_users(*username):
     cursor.execute(query)
     database.conn.commit()
 
+def batch_update(*usernames, **dict):
+    if len(usernames) <= 0: return
+    qdata = ', '.join(["%s=:%s"%(id,id) for id in dict.keys()])
+    qwhere = 'WHERE username IN %s' % str(usernames)
+    if qwhere[-2:] == ',)': qwhere = qwhere[:-2] + ')'
+    query = 'UPDATE user SET %s %s' % (qdata, qwhere)
+    cursor.execute(query, dict)
+    database.conn.commit()
+
 is_good_username = lambda username: re.match(r'^[\w\-\.]+$', username)
 salt_password = lambda password: md5(password + config.USER_SALT).hexdigest()
