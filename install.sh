@@ -37,9 +37,6 @@ else
 
 fi
 
-echo "Update and start Shadowsocks."
-./cli.py sys update 2>&1 >/dev/null
-
 function confirm() {
     while true; do
         read -p "$*? (yes/no): " yn
@@ -51,13 +48,31 @@ function confirm() {
     done
 }
 
-# CRONJOB Install
+# CRONJOB Install/Uninstall
     CRONFILE=/tmp/ssland.cron.tmp
-    EXECCMD="`readlink -f cron.py` -s"
+    EXECCMD="cd `pwd` && ./cron.py -s"
     crontab -l >$CRONFILE
-    if confirm Install cronjob and enable traffic statistic
+    if confirm Use cronjob and traffic statistic; then
         grep -q "$EXECCMD" $CRONFILE || ({ cat $CRONFILE; echo "59 23 * * * $EXECCMD"; } | crontab -)
     else
         grep -v "$EXECCMD" $CRONFILE | crontab -
     fi
     rm -f $CRONFILE
+
+# WebSevice Install/Uninstall
+    RCFILE=/etc/rc.local
+    EXECCMD="(cd `pwd` && ./web.py -d start)"
+    if confirm Start web server when system boots; then
+        grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
+    else
+        sed -i "/$EXECCMD/d" $RCFILE
+    fi
+
+# End of Wizard
+    echo "Start web server."
+    ./web.py -d restart
+    
+    echo "Update and start Shadowsocks."
+    ./cli.py sys update
+    
+    sleep 1 && echo "Everything shall be ok now. Thanks for using SSLand."
