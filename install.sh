@@ -8,25 +8,34 @@ type ssserver >/dev/null 2>&1 || { pip install shadowsocks; }
 
 pip install -r requirements.txt
 
-default_cfg=/etc/ss.conf
-read -p "Shadowsocks config file [ default: $default_cfg ] = " cfg
-cfg=${cfg:-$default_cfg}
+if (grep WIZARD_GENERATED config.py >/dev/null); then
 
-[[ -f $cfg ]] && echo "WARNING: File exists." || \
-    echo "The encrypt method is aes-256-cfb. You can change this later by editing $cfg"
+    echo "Found WIZARD_GENERATED mark. Skipping wizard."
 
-read -p "User port formular [ default: 6580+id ] = " port
-port=${port:-6580+id}
+else
 
-sed config.py -r -i                                             \
-    -e "s|^USER_SALT.+$|USER_SALT='`openssl rand -base64 16`'|" \
-    -e "s|^user_port.+$|user_port=lambda id:${port}|"           \
-    -e "s|/etc/ss.conf|${cfg}|"                                 \
+    default_cfg=/etc/ss.conf
+    read -p "Shadowsocks config file [ default: $default_cfg ] = " cfg
+    cfg=${cfg:-$default_cfg}
 
-echo "Creating the first user, which is also the administrator."
-./cli.py user add
+    [[ -f $cfg ]] && echo "WARNING: File exists." || \
+        echo "The encrypt method is aes-256-cfb. You can change this later by editing $cfg"
 
-echo "Update and start Shadowsocks..."
+    read -p "User port formular [ default: 6580+id ] = " port
+    port=${port:-6580+id}
+
+    sed config.py -r -i                                             \
+        -e "s|^USER_SALT.+$|USER_SALT='`openssl rand -base64 16`'|" \
+        -e "s|^user_port.+$|user_port=lambda id:${port}|"           \
+        -e "s|/etc/ss.conf|${cfg}|"                                 \
+        -e "7a# WIZARD_GENERATED = '`date`'"
+
+    echo "Creating the first user, which is also the administrator."
+    ./cli.py user add
+
+    git commit -am "Custom configuration snapshot" >/dev/null 2>&1
+
+fi
+
+echo "Update and start Shadowsocks."
 ./cli.py sys update
-
-git commit -am "Custom configuration snapshot" >/dev/null 2>&1
