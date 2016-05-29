@@ -1,4 +1,6 @@
 *.pyc
 *.pyd
+*.log
+*.tmp
 user/*
 .vscode/

@@ -16,7 +16,7 @@ bottle.TEMPLATE_PATH.insert(0, WEB_ROOT)
 bottle.debug(True)
 
 # FIXME: Use another graceful way to pass current_user to processors
-current_user = user.User({})
+current_user = user.User()
 
 # decorator that used for login_only pages
 def require_login(func):
@@ -26,7 +26,7 @@ def require_login(func):
         password = request.get_cookie('ssl_pw')
         logined = username and password
         if logined:
-            current_user = user.open(username)
+            current_user = user.get_by_username(username)
             logined = current_user and current_user.salted_password == password
         if not logined:
             response.set_cookie('ssl_un', '', expires=0)
@@ -50,7 +50,7 @@ def passwd():
     password = get_salted_password()
     
     u = current_user
-    if (u.id == 0): u = user.open(request.forms.get('username'))
+    if (u.id == 0): u = user.get_by_username(request.forms.get('username'))
     
     u.salted_password = password
     u.write()
@@ -62,7 +62,7 @@ def sskey():
     sskey = request.forms.get('sskey')
     
     u = current_user
-    if (u.id == 0): u = user.open(request.forms.get('username'))
+    if (u.id == 0): u = user.get_by_username(request.forms.get('username'))
     
     u.sskey = sskey
     u.write()
@@ -79,7 +79,7 @@ def sskey():
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == 0 else {})
     )
 
 @post('/cli')
@@ -97,7 +97,7 @@ def cli():
         config=config, 
         user=current_user,
         message="EXECUTED",
-        users=user._USER_CACHE
+        users=user.get_all()
     )
 
 @route('/updateServer')
@@ -115,7 +115,7 @@ def updateServer():
         config=config, 
         user=current_user,
         message=msg, 
-        users=user._USER_CACHE
+        users=user.get_all()
     )
 
 @route('/suspend/<suspend>/<username>')
@@ -124,7 +124,7 @@ def suspend(suspend, username):
     if (current_user.id != 0):
         return redirect('/')
     
-    u = user.open(username)
+    u = user.get_by_username(username)
     u.suspended = suspend != "0"
     u.write()
     
@@ -134,7 +134,7 @@ def suspend(suspend, username):
         config=config, 
         user=current_user,
         message=msg, 
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == 0 else {})
     )
 
 @route('/')
@@ -147,7 +147,7 @@ def server_index():
         'home', 
         config=config, 
         user=current_user,
-        users=(user._USER_CACHE if current_user.id == 0 else {})
+        users=(user.get_all() if current_user.id == 0 else {})
     )
 
 # Login and Logout
@@ -167,7 +167,7 @@ def do_login():
     username = request.forms.get('username')
     password = get_salted_password()
     
-    current_user = user.open(username)
+    current_user = user.get_by_username(username)
     logined = current_user and current_user.salted_password == password
     
     if logined:

@@ -36,8 +36,8 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
       </tr>
     </thead>
     <tbody>
-% for n in users:
-% u = users[n]
+% for u in users:
+% n = u.username
       <tr>
         <td>{{ n }}{{ "(suspended)" if u.suspended else "" }}</td>
         <td>{{ config.user_port(u.id) }}</td>

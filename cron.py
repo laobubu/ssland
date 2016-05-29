@@ -74,8 +74,7 @@ if __name__ == "__main__":
     if restart_ss:
         import traceback
         try:
-            import user, ssmgr
-            user.cache_all()
+            import ssmgr
             ssmgr.update_and_restart()
         except:
             print("Cannot update_and_restart SS.")

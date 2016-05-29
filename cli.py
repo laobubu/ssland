@@ -29,30 +29,31 @@ def print_help():
 
 def run(scope, action, argv):
     if scope == 'user':
-        user.cache_all();
         if   action == 'list':
-            for un in user._USER_CACHE.keys():
-                print(un)
+            print("id\tusername\tsuspended\tport\tsskey")
+            for u in user.get_all()
+                print('\t'.join(u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey))
         elif action == 'add':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
             sskey    = argv[2] if len(argv) > 2 else getpass.getpass('Shadowsocks Key: ')
-            u = user.User(username, password)
+            u = user.User()
+            u.username = username
+            u.set_password(password)
             u.sskey = sskey
             u.write()
         elif action == 'del':
-            for un in argv:
-                os.remove(user.user_filename(un))
+            user.delete_users(argv)
         elif action == 'passwd':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             password = argv[1] if len(argv) > 1 else getpass.getpass()
-            u = user.open(username)
+            u = user.get_by_username(username)
             u.set_password(password)
             u.write()
         elif action == 'sskey':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
             sskey    = argv[1] if len(argv) > 1 else getpass.getpass('Shadowsocks Key: ')
-            u = user.open(username)
+            u = user.get_by_username(username)
             u.sskey = sskey
             u.write()
     elif scope == 'sys':
