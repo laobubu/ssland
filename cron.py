@@ -57,28 +57,28 @@ def start():
     return cd
 
 if __name__ == "__main__":
-    if "-h" in sys.argv:
-      print('''
-  SSLand cronjob script
-  
-    Update statistic, account status and Shadowsocks config.
-  
-  Usage:
-  
-    [-f]        Forcibly update and restart Shadowsocks.
-      ''')
-      sys.exit(0)
+    import argparse
+    parser = argparse.ArgumentParser(description='Update statistic, account status and Shadowsocks config.')
+    parser.add_argument('-i', '--instant', action='store_true',  help="Don't wait for the cool-down time.")
+    parser.add_argument('-s', '--stat',    action='store_true',  help="Update traffic statistic.")
+    parser.add_argument('-f', '--force',   action='store_true',  help="Forcibly update and restart Shadowsocks.")
+    flags = parser.parse_args(sys.argv[1:])
     
     # Execute Cronjob tasks
     pid = os.getpid()
     with open(PID_FILE, 'w') as f:
         f.write(str(pid))
     
-    cd = get_cd()
-    time.sleep(cd)
+    if flags.stat:
+        import traffic
+        traffic.stat()
+    
+    if flags.instant:
+        cd = get_cd()
+        time.sleep(cd)
     
     # use -f argument to forcly update configuration and restart Shadowsocks 
-    restart_ss = "-f" in sys.argv
+    restart_ss = flags.force
     if os.path.isfile(FLAG_FILE):
         restart_ss = True
         os.remove(FLAG_FILE)

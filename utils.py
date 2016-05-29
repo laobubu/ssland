@@ -5,10 +5,8 @@
 #   Just some useful functions
 #
 
-import sys
-import subprocess
-
 def get_stdout(*args):
+    import subprocess
     p = subprocess.Popen(*args, stdout=subprocess.PIPE, bufsize=1)
     o = []
     with p.stdout:

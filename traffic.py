@@ -10,7 +10,7 @@ import re
 from utils import get_stdout
 
 # the command that runs iptables
-IPTABLES = ('iptables')
+IPTABLES = ('iptables',)
 
 def stat():
     '''
@@ -46,5 +46,38 @@ def stat():
     cursor.close()
     database.conn.commit()
 
-def query_all(least_time=None):
-    '''SELECT user, sum(packages), sum(traffic) FROM traffic WHERE time >= datetime('2016-05-29 07:59:00') GROUP BY user'''
+QS_NONE=0
+QS_ALL=1
+QS_MONTH=2
+QS_DAY=3
+QS_YEAR=4
+
+def query(uid=-1, min_time=None, max_time=None, sum=QS_NONE):
+    '''
+    Query database, returning Array of tuples (userID, pkgs, bytes, str_time)
+    '''
+    cond = []
+    if uid>=1:    cond.append('user = %d'%uid)
+    if min_time:  cond.append('datetime(time) >= \'%s\''%min_time)  # format: 2016-05-10 12:59:00
+    if max_time:  cond.append('datetime(time) <= \'%s\''%max_time)
+    
+    q_where = (' WHERE '+' AND '.join(cond)) if len(cond) else ''
+    if sum:
+        sumfunc = "time"                        if sum == QS_ALL    else \
+                  "strftime('%Y', time)"        if sum == QS_YEAR   else \
+                  "strftime('%Y-%m', time)"     if sum == QS_MONTH  else \
+                  "date(time)"                  if sum == QS_DAY    else \
+                  "time"
+        query = 'SELECT user, sum(packages), sum(traffic), %s AS t FROM traffic %s GROUP BY user' % (sumfunc, q_where)
+        if sumfunc != "time": query = query + ', t'
+    else:
+        query = 'SELECT user, packages, traffic, time FROM traffic' + q_where
+    
+    print query
+    
+    cursor = database.conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    
+    return result
