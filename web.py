@@ -201,14 +201,18 @@ if __name__ == "__main__":
         sys.exit(0)
     
     if flags.daemon in ('start', 'restart'):
+        shall_run = True
         try:
             with open(DAEMON_PID_FILE, 'r') as f:
                 pid = int(f.read())
                 os.kill(pid, 0)
                 print("Already running daemon with PID %d" % pid)
-                sys.exit(0)
+                shall_run = False
                 # Already running one. Do nothing
         except:
+            pass
+            
+        if shall_run:
             # Thread not found. Create
             pid = os.fork()
             assert pid != -1
@@ -232,5 +236,7 @@ if __name__ == "__main__":
             
             sys.stdin.close()
             #TODO: Output log
+            
+        sys.exit(0)
     
     run(host=config.WEB_HOST, port=config.WEB_PORT)
