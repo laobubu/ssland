@@ -1,7 +1,7 @@
 #!/bin/sh
 # Linux Install script
 
-[[ $EUID -ne 0 ]] && { echo "The root privilege is required. Aborting." >&2;   exit 1; }
+[ ! $EUID = 0 ] &&   { echo "The root privilege is required. Aborting." >&2;   exit 1; }
 type python   >/dev/null 2>&1 || { echo "Python not found. Aborting." >&2;     exit 1; }
 type pip      >/dev/null 2>&1 || { echo "Python pip not found. Aborting." >&2; exit 1; }
 type ssserver >/dev/null 2>&1 || { pip install shadowsocks; }
@@ -18,7 +18,7 @@ else
     read -p "Shadowsocks config file [ default: $default_cfg ] = " cfg
     cfg=${cfg:-$default_cfg}
 
-    [[ -f $cfg ]] && echo "WARNING: File exists." || \
+    [ -f $cfg ] && echo "WARNING: File exists." || \
         echo "The encrypt method is aes-256-cfb. You can change this later by editing $cfg"
 
     read -p "User port formular [ default: 6580+id ] = " port
@@ -41,7 +41,7 @@ else
 
 fi
 
-function confirm() {
+confirm () {
     while true; do
         read -p "$*? (yes/no): " yn
         case $yn in
