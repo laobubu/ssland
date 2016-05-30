@@ -55,12 +55,11 @@ confirm () {
 # CRONJOB Install/Uninstall
     CRONFILE=/tmp/ssland.cron.tmp
     EXECCMD="cd `pwd` && ./cron.py -s"
-    crontab -l >$CRONFILE
+    crontab -l | sed "/$EXECCMD/d" >$CRONFILE
     if confirm Use cronjob and traffic statistic; then
-        grep -q "$EXECCMD" $CRONFILE || ({ cat $CRONFILE; echo "59 23 * * * $EXECCMD"; } | crontab -)
-    else
-        grep -v "$EXECCMD" $CRONFILE | crontab -
+        echo "0 0 * * * $EXECCMD" >>$CRONFILE
     fi
+    cat $CRONFILE | crontab -
     rm -f $CRONFILE
 
 # WebSevice Install/Uninstall
@@ -72,11 +71,8 @@ confirm () {
         sed -i "/$EXECCMD/d" $RCFILE
     fi
 
-# End of Wizard
-    echo "Start web server."
-    ./web.py -d restart
-    
-    echo "Update and start Shadowsocks."
+# End of Wizard    
+    echo "Update and start Shadowsocks, SSLand web."
     nohup ./cli.py sys update </dev/null >/dev/null 2>&1 &
     
     echo "Everything shall be ok now. Thanks for using SSLand."
