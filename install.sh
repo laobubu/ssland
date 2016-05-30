@@ -55,7 +55,8 @@ confirm () {
 # CRONJOB Install/Uninstall
     CRONFILE=/tmp/ssland.cron.tmp
     EXECCMD="cd `pwd` && ./cron.py -s"
-    crontab -l | sed "/$EXECCMD/d" >$CRONFILE
+    EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
+    crontab -l | sed "/$EXECCMD_SEDSAFE/d" >$CRONFILE
     if confirm Use cronjob and traffic statistic; then
         echo "0 0 * * * $EXECCMD" >>$CRONFILE
     fi
@@ -68,7 +69,8 @@ confirm () {
     if confirm Start web server when system boots; then
         grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
     else
-        sed -i "/$EXECCMD/d" $RCFILE
+        EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
+        sed -i "/$EXECCMD_SEDSAFE/d" $RCFILE
     fi
 
 # End of Wizard    
