@@ -73,8 +73,6 @@ def query(uid=-1, min_time=None, max_time=None, sum=QS_NONE):
     else:
         query = 'SELECT user, packages, traffic, time FROM traffic' + q_where
     
-    print query
-    
     cursor = database.conn.cursor()
     cursor.execute(query)
     result = cursor.fetchall()
