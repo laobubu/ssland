@@ -31,9 +31,8 @@ def stat():
         t[int(i[2])] = ( int(i[0]) , int(i[1]) )
         
     query = []
-    users = user.get_all()
+    users = user.get_all(only_active=True)
     for u in users:
-        if u.suspended: continue
         port = config.user_port(u.id)
         if port in t:
             ti = t[port]

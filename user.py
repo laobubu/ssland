@@ -73,8 +73,14 @@ def get_by_id(id):
     if len(dc) == 0: return None
     return User(dc[0])
     
-def get_all():
-    dc = cursor.execute('SELECT * FROM user').fetchall()
+def get_all(only_active=False):
+    where = []
+    if only_active: where.append("suspended = 0")
+    
+    query = 'SELECT * FROM user'
+    if len(where): query = query + ' WHERE ' + ' '.join(where)
+    
+    dc = cursor.execute(query).fetchall()
     return [User(row) for row in dc]
 
 def delete_users(*username):
