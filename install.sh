@@ -65,8 +65,8 @@ confirm () {
 
 # WebSevice Install/Uninstall
     RCFILE=/etc/rc.local
-    EXECCMD="(cd `pwd` && ./web.py -d start)"
-    if confirm Start web server when system boots; then
+    EXECCMD="(cd `pwd` && ./cli.py sys update)"
+    if confirm Start web server and Shadowsocks when system boots; then
         grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
     else
         EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
