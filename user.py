@@ -54,12 +54,12 @@ class User:
         if len(dc) == 1:
             User.__init__(self, dc[0])
     
-    def write(self):
+    def write(self, commit=True):
         cursor.execute('UPDATE user SET username=?, password=?, sskey=?, since=?, suspended=?, meta=? WHERE id = ?',
         (
             self.username, self.salted_password, self.sskey, self.since, (1 if self.suspended else 0), json.dumps(self.meta), self.id
         ))
-        database.conn.commit()
+        if commit: database.conn.commit()
     
     def delete(self):
         cursor.execute('DELETE FROM user WHERE id = %d' % self.id)
