@@ -41,7 +41,7 @@ def stat():
         port = config.user_port(u.id)
         if port in t:
             ti = t[port]
-            query.append((u.id, ti[0], ti[1]))
+            if ti[0] and ti[1]: query.append((u.id, ti[0], ti[1]))      # skip empty record
         else:
             get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--sport',str(port)))
             get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--dport',str(port)))
