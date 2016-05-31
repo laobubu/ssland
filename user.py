@@ -26,7 +26,10 @@ class User:
         self.meta = {}
         if dbRow:
             [self.id, self.username, self.salted_password, self.sskey, self.since, self.suspended, meta] = dbRow
-            self.meta = json.loads(meta)
+            try: 
+                self.meta = json.loads(meta)
+            except: 
+                pass
     
     def create(self):
         if self.id == -1:
