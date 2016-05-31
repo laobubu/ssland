@@ -11,24 +11,29 @@ from utils import get_stdout
 
 # the command that runs iptables
 IPTABLES = ('/sbin/iptables',)
+CHAIN_NAME = 'SSLAND2'
 
 def stat():
     '''
     Get the stat data and storage into database.
     Add IPTABLES rules if necessary.
     '''
-    cs, ec = get_stdout(IPTABLES + ('-nxvL', 'SSLAND')) # get current stat
+    cs, ec = get_stdout(IPTABLES + ('-nxvL', CHAIN_NAME)) # get current stat
     if ec == 3: return False   # No privilege
     if ec == 1: # chain not found
         # create the chain
-        get_stdout(IPTABLES + ('-N','SSLAND'))
-        get_stdout(IPTABLES + ('-I','OUTPUT','1','-j','SSLAND'))
-    get_stdout(IPTABLES + ('-Z','SSLAND')) # empty IPTABLES stat
+        get_stdout(IPTABLES + ('-N',CHAIN_NAME))
+        get_stdout(IPTABLES + ('-I','INPUT','1','-j',CHAIN_NAME))
+        get_stdout(IPTABLES + ('-I','OUTPUT','1','-j',CHAIN_NAME))
+    get_stdout(IPTABLES + ('-Z',CHAIN_NAME)) # empty IPTABLES stat
     
     t  = {}  # dict PORT=>(pkgs, bytes)
-    for i in re.findall(r"^\s*(\d+)\s+(\d+).+dpt:(\d+)", cs, re.M):
+    for i in re.findall(r"^\s*(\d+)\s+(\d+).+[sd]pt:(\d+)", cs, re.M):
         # i = Pkgs   Traffic(byte)   port
-        t[int(i[2])] = ( int(i[0]) , int(i[1]) )
+        port = int(i[2])
+        if not port in t: t[port] = [0, 0]
+        t[port][0] += int(i[0])
+        t[port][1] += int(i[1])
         
     query = []
     users = user.get_all(only_active=True)
@@ -38,7 +43,8 @@ def stat():
             ti = t[port]
             query.append((u.id, ti[0], ti[1]))
         else:
-            get_stdout(IPTABLES + ('-A','SSLAND','-p','tcp','--dport',str(port)))
+            get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--sport',str(port)))
+            get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--dport',str(port)))
             
     cursor = database.conn.cursor()
     cursor.executemany('INSERT INTO traffic(user,packages,traffic) VALUES (?, ?, ?)', query)
