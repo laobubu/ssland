@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="referrer" content="none">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin - SSLand</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.gradient.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/datepicker.gradient.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/notify.gradient.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/uikit.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/notify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+</head>
+
+<body>
+
+    <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+
+        <nav class="uk-navbar uk-margin-large-bottom">
+            <span class="uk-navbar-brand uk-hidden-small">SSLand Admin</span>
+            <ul class=" uk-navbar-nav" data-uk-switcher="{connect:'#main-ptl'}">
+                <li class="uk-active"><a href="">User</a></li>
+                <li><a href="">Limiter</a></li>
+                <li><a href="">Traffic</a></li>
+                <li><a href="">System</a></li>
+            </ul>
+
+            <div class="uk-navbar-flip">
+                <ul class="uk-navbar-nav">
+                    <li><a href="/">Back</a></li>
+                    <li><a href="/login">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <ul id="main-ptl" class="uk-switcher">
+            <li>
+                <h2>User List</h2>
+                <table class="uk-table">
+                    <thead>
+                        <tr>
+                            <th width="200">User</th>
+                            <th width="80">Port</th>
+                            <th width="200">SSKey</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="u in users">
+                            <td>{{ u.username }}{{ u.suspended && "(suspended)" || "" }}</td>
+                            <td>{{ u.port }}</td>
+                            <td>{{ u.sskey }}</td>
+                            <td>
+                                <button @click="suspend($index)" class="uk-button uk-button-small" type="button">{{ u.suspended && "Unsuspend" || "Suspend" }}</button>
+                                <button @click="app.uindex=$index" data-uk-modal="{target:'#passwd'}" class="uk-button uk-button-small" type="button">Password</button>
+                                <button @click="app.uindex=$index" data-uk-modal="{target:'#sskey'}" class="uk-button uk-button-small" type="button">SSKey</button>
+                                <button @click="user_del($index)" class="uk-button uk-button-small" type="button">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div id="passwd" class="uk-modal">
+                    <div class="uk-modal-dialog">
+                        <a class="uk-modal-close uk-close"></a>
+                        <form class="uk-form">
+                        <p>Password for {{ users[app.uindex].username }}</p>
+                        <p>
+                            <input type="password" placeholder="" class="uk-width-4-5" name="password">
+                            <input type="hidden" name="username" :value="users[app.uindex].username">
+                            <input type="hidden" name="md5ed">
+                            <button type="submit" class="uk-button uk-button-primary">Modify</button>
+                        </p>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="sskey" class="uk-modal">
+                    <div class="uk-modal-dialog">
+                        <a class="uk-modal-close uk-close"></a>
+                        <form class="uk-form">
+                        <p>Shadowsocks Key for {{ users[app.uindex].username }}</p>
+                        <p>
+                            <input type="text" placeholder="" class="uk-width-4-5" name="sskey" :value="users[app.uindex].sskey">
+                            <input type="hidden" name="username" :value="users[app.uindex].username">
+                            <button type="submit" class="uk-button uk-button-primary">Modify</button>
+                        </p>
+                        </form>
+                    </div>
+                </div>
+                
+                <h2>Add User</h2>
+                
+                <form id="user_add" class="uk-form uk-form-stacked">
+                    <div class="uk-form-row"><label class="uk-form-label">Username </label><input required class="uk-form-controls" type="text" name="username"></div>
+                    <div class="uk-form-row"><label class="uk-form-label">Password </label><input required class="uk-form-controls" type="password" name="password"></div>
+                    <div class="uk-form-row"><label class="uk-form-label">SSKey </label><input required class="uk-form-controls" type="text" name="sskey"></div>
+                    <div class="uk-form-row">
+                        <input type="hidden" name="md5ed">
+                        <button type="submit" class="uk-button">Create User</button>
+                    </div>
+                </form>
+            </li>
+            <li>
+                <h2>Limit Editor</h2>
+            </li>
+            <li>
+                <h2>Traffic View</h2>
+                <form id="traffic-view" class="uk-form">
+                    <P>
+                        Statistic 
+                        <label> from <input name="from" type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(ever)"></label>
+                        <label> to   <input name="to"   type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(now)"></label>
+                        <button type="submit" class="uk-button">Query</button>
+                    </P>
+                </form>
+            </li>
+            <li>
+                <h2>System</h2>
+                <p>
+                    <button class="uk-button" type="button">Update</button> :: Regenerate the configuration file and restart Shadowsocks.
+                </p>
+                
+                <h2>CLI Execute</h2>
+                <form id="cli" class="uk-form">
+                    <div class="uk-form-row uk-width-1-1 uk-form-icon">
+                        <i class="uk-icon-terminal"></i>
+                        <input class="uk-width-8-10" autocomplete="off" id="clicmd" type="text" placeholder="user add someone password sskey...">
+                        <button type="submit" class="uk-button uk-button-primary">Execute</button>
+                    </div>
+                    <div class="uk-form-row uk-panel"><pre>This feature is dangerous. Be careful.</pre></div>
+                </form>
+            </li>
+        </ul>
+        
+    </div>
+    <script src="/static/yuck.js"></script>
+    <script src="/static/admin.js"></script>
+</body>
+
+</html>

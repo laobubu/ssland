@@ -7,8 +7,9 @@
 
 def get_stdout(*args):
     import subprocess
-    p = subprocess.Popen(*args, stdout=subprocess.PIPE, bufsize=1)
+    p = subprocess.Popen(*args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1)
     o = []
+    p.stdin.close()
     with p.stdout:
         for line in iter(p.stdout.readline, b''):
             o.append(line)
