@@ -173,6 +173,15 @@ def admin_user_sskey():
     u.write()
     return { "status": "ok" }
 
+@admin_api('/admin/user/limit')
+def admin_user_limit():
+    username, limit = [request.forms.get(n) for n in ('username', 'limit')]
+    limit = json.loads(limit)
+    u = user.get_by_username(username)
+    u.set_meta("limit", limit)
+    u.write()
+    return { "status": "ok" }
+
 @admin_api('/admin/user/suspend')
 def admin_user_suspend():
     username, suspend = [request.forms.get(n) for n in ('username', 'suspend')]

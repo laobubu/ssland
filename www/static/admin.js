@@ -19,7 +19,8 @@ var app = {
         }
     ],
     "app": {
-        uindex: 0
+        uindex: 0,
+        limit: []
     }
 };
 app = new Vue({
@@ -34,6 +35,11 @@ app = new Vue({
             var u = app.users[i];
             if (!confirm('Delete user ' + u.username + '?')) return false;
             api('user/del', { username: u.username }, function (rtn) { app.users.splice(i, 1); })
+        },
+        lim_open: function (i) {
+            app.app.uindex = i;
+            app.app.limit = (app.users[i].meta.limit || []).slice();
+            setTimeout(function() { UIkit.switcher('#main-ptl').show(1); }, 100);
         }
     }
 });
@@ -102,6 +108,31 @@ $('#traffic-view').submit(function() {
     alert('Not implemented yet')
     return false;
 })
+
+var limSinceFormat = /^(this-(week|month)|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/;
+$('#lim-editor-submit').click(function() {
+    var u = app.users[app.app.uindex];
+    
+    if (!app.app.limit.every(function(r){
+        return (limSinceFormat.test(r.since));
+    })) {
+        alert("A rule has invalid time param!");
+        return false;
+    }
+    
+    api('user/limit', {
+        username: u.username,
+        limit: JSON.stringify(app.app.limit)
+    }, function(){
+        UIkit.notify('Modified');
+        u.meta.limit = app.app.limit.slice();
+    })
+    return false;
+})
+
+function sys_restart() {
+    api('restart',function(rsp){UIkit.notify('System will restart in '+rsp.time+' sec.')})
+}
 
 reload_users();
 api('basic', function (rsp) {

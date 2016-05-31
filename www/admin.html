@@ -29,12 +29,16 @@
                 <li><a href="">Traffic</a></li>
                 <li><a href="">System</a></li>
             </ul>
-
+                
             <div class="uk-navbar-flip">
                 <ul class="uk-navbar-nav">
                     <li><a href="/">Back</a></li>
                     <li><a href="/login">Logout</a></li>
                 </ul>
+            </div>
+
+            <div class="uk-navbar-flip uk-navbar-content">
+                <button onclick="sys_restart" class="uk-button uk-button-primary" type="button">Restart SS</button>
             </div>
         </nav>
 
@@ -59,6 +63,7 @@
                                 <button @click="suspend($index)" class="uk-button uk-button-small" type="button">{{ u.suspended && "Unsuspend" || "Suspend" }}</button>
                                 <button @click="app.uindex=$index" data-uk-modal="{target:'#passwd'}" class="uk-button uk-button-small" type="button">Password</button>
                                 <button @click="app.uindex=$index" data-uk-modal="{target:'#sskey'}" class="uk-button uk-button-small" type="button">SSKey</button>
+                                <button @click="lim_open($index)" class="uk-button uk-button-small" type="button">Limit</button>
                                 <button @click="user_del($index)" class="uk-button uk-button-small" type="button">Delete</button>
                             </td>
                         </tr>
@@ -107,7 +112,44 @@
                 </form>
             </li>
             <li>
-                <h2>Limit Editor</h2>
+                <h2>Limitation Editor</h2>
+                <div class="uk-form">
+                    <p>The user is restricted by</p>
+                    <ul class="uk-list uk-list-striped">
+                        <li v-for="r in app.limit">
+                            <button @click="app.limit.splice($index,1)" type="button" class="uk-button"><i class="uk-icon-close"></i></button>
+                            <select v-model="r.type">
+                                <option value="time">Time</option>
+                                <option value="traffic">Traffic</option>
+                            </select>
+                            <span v-if="r.type=='time'">
+                                Suspended when 
+                            </span>
+                            <span v-if="r.type=='traffic'">
+                                Suspended if the user spend 
+                                <input type="number" v-model="r.amount">
+                                bytes since
+                            </span> 
+                            <input type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(input here)" v-model="r.since">
+                            <select v-model="r.since">
+                                <option value="">(a specified time)</option>
+                                <option value="this-month">(this month)</option>
+                                <option value="this-week">(this week)</option>
+                            </select>
+                        </li>
+                        <li>
+                             <button @click="app.limit.push({type:'traffic', amount:0, since:''})" type="button" class="uk-button uk-button-small"><i class="uk-icon-plus"></i> Add</button>
+                             <button @click="app.limit=[]" type="button" class="uk-button uk-button-small"><i class="uk-icon-trash-o"></i> Empty</button>
+                        </li>
+                    </ul>
+                    <p>
+                        <select v-model="app.uindex">
+                            <option :value="$index" v-for="u in users">{{ u.username }}</option>
+                        </select>
+                        <button type="button" class="uk-button uk-button-primary" id="lim-editor-submit">Apply to {{ users[app.uindex].username }}</button>
+                        <button @click="app.limit = users[app.uindex].meta.limit.slice()" type="button" class="uk-button" id="lim-read">Read from {{ users[app.uindex].username }}</button>
+                    </p>
+                </div>
             </li>
             <li>
                 <h2>Traffic View</h2>
@@ -123,7 +165,8 @@
             <li>
                 <h2>System</h2>
                 <p>
-                    <button class="uk-button" type="button">Update</button> :: Regenerate the configuration file and restart Shadowsocks.
+                    <button onclick="sys_restart" class="uk-button" type="button">Update</button>
+                     :: Regenerate the configuration file and restart Shadowsocks.
                 </p>
                 
                 <h2>CLI Execute</h2>
