@@ -114,6 +114,7 @@ $('#lim-editor-submit').click(function() {
     var u = app.users[app.app.uindex];
     
     if (!app.app.limit.every(function(r){
+        r.amount = parseInt(r.amount);
         return (limSinceFormat.test(r.since));
     })) {
         alert("A rule has invalid time param!");
