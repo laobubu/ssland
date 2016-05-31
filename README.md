@@ -7,6 +7,7 @@ A lightweight Shadowsocks multi-user web-frontend.
  - **Lightweight**: No heavy frameworks! Only requires Python and `bottle.py`
  - **Web Panel**: Manage Shadowsocks users, on the web.
  - **Statistic**: Use `iptables` to stats users' traffic.
+ - **Limiter**: Auto suspend users when they excceed the limitation.
 
 ## How to Use
 

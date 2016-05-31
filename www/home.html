@@ -5,7 +5,7 @@
   <p>Here is the configuration: </p>
   
   <pre>Port: {{ config.user_port(user.id) }}
-Status: {{ "Active" if not user.suspended else "Suspended" }} 
+Status: {{ "Active" if not user.suspended else "Suspended " + user.get_meta('limiter_log', '') }} 
 % if message:
 
 {{ message }}
