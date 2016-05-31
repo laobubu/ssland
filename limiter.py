@@ -39,7 +39,7 @@ def check_user(u):
         elif type == 'traffic':  # Traffic-limited rule. amount: traffic in bytes.
             tq = traffic.query(uid=u.id, min_time=since.strftime(DATE_FORMAT), sum=traffic.QS_ALL)
             if tq[0][2] > amount:
-                msg = "Traffic: %s excceed %s" % (utils.sizeof_fmt(tq[2]), utils.sizeof_fmt(amount))
+                msg = "Traffic: %s excceed %s" % (utils.sizeof_fmt(tq[0][2]), utils.sizeof_fmt(amount))
                 break
         
     return msg
