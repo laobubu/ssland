@@ -10,7 +10,7 @@ import re
 from utils import get_stdout
 
 # the command that runs iptables
-IPTABLES = ('iptables',)
+IPTABLES = ('/sbin/iptables',)
 
 def stat():
     '''
