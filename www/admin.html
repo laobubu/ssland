@@ -10,10 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/datepicker.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/notify.gradient.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/tooltip.gradient.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/uikit.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/notify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/tooltip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
 </head>
 
@@ -56,7 +58,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="u in users">
-                            <td>{{ u.username }}{{ u.suspended && "(suspended)" || "" }}</td>
+                            <td>
+                                {{ u.username }}
+                                <span v-if="u.suspended" class="uk-badge" data-uk-tooltip :title="u.meta.limiter_log || ''">Suspended</span>
                             <td>{{ u.port }}</td>
                             <td>{{ u.sskey }}</td>
                             <td>
