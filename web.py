@@ -72,7 +72,7 @@ def get_salted_password():
     return password
 
 # home panel Generator
-get_home_content = lambda msg=None: template('home', config=config, user=current_user, is_admin=is_admin, message=msg)
+get_home_content = lambda msg='': template('home', config=config, user=current_user, is_admin=is_admin, message=msg)
 
 
 
