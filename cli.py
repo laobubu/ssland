@@ -5,8 +5,8 @@
 #
 
 import config, user
-import sys
-import getpass
+from utils import *
+import sys, os, getpass
 
 def print_help():
   print(
@@ -26,6 +26,8 @@ def print_help():
     user sskey {username} {sskey}
 
     sys update
+    
+    tx query      (tx = traffic)
   ''')
   sys.exit(0)
 
@@ -66,19 +68,27 @@ def run(scope, action, argv):
         else:
             print_help()
     elif scope == 'sys':
+        import ssmgr
         if   action == 'update':
-            import ssmgr
             ssmgr.update_and_restart()
             
             try:
-                import os
                 with open(config.TMP_ROOT + "/ssland.web.pid", 'r') as f:
                     pid = int(f.read())
                     os.kill(pid, 0)
-                    from utils import get_stdout
                     get_stdout(["./web.py", "-d", "restart"])
             except:
                 pass
+        else:
+            print_help()
+    elif scope == 'tx' or scope == 'traffic':
+        import traffic
+        if   action == 'query':
+            un = {}
+            for u in user.get_all():
+                un[u.id] = u.username
+            for r in traffic.query(sum=traffic.QS_DAY):
+                print("%s\t%s\t%s"%(un[r[0]], r[3], sizeof_fmt(r[2])))
         else:
             print_help()
     else:

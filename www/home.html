@@ -5,53 +5,17 @@
   <p>Here is the configuration: </p>
   
   <pre>Port: {{ config.user_port(user.id) }}
-Status: {{ "Active" if not user.suspended else "Suspended" }} 
-% if defined('message'):
+Status: {{ "Active" if not user.suspended else "Suspended " + user.get_meta('limiter_log', '') }} 
+% if message:
 
 {{ message }}
 % end
 </pre>
   
-% if user.id == config.USER_ADMIN:
-  
+% if is_admin:
   <h2>Administrator</h2>
   
-  <h3>Server stuff</h3>
-  <form action="/cli" method="POST">
-    <p><input type="text" autocomplete="off" name="cmd" id="clicmd" placeholder="user add someone password sskey..."></p>
-    <p>
-      <input type="submit" value="Execute CLI">
-      <a class="button" href="/updateServer">Update SSConfig</a>
-    </p>
-  </form>
-  
-  <h3>Users</h3>
-  <table id="admin-table">
-    <thead>
-      <tr>
-        <th width="200">User</th>
-        <th width="80">Port</th>
-        <th width="200">SSKey</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-  % for u in users:
-  % n = u.username
-      <tr>
-        <td>{{ n }}{{ "(suspended)" if u.suspended else "" }}</td>
-        <td>{{ config.user_port(u.id) }}</td>
-        <td>{{ u.sskey }}</td>
-        <td>
-          <a href="#sskey" onclick="void mod('sskey', 'sskey', '{{ n }}')">[sskey]</a>
-          <a href="#passwd" onclick="void mod('passwd','password', '{{ n }}')">[passwd]</a>
-          <a href="/suspend/{{ 0 if u.suspended else 1 }}/{{ n }}">[{{ "suspend" if not u.suspended else "unsuspend" }}]</a>
-        </td>
-      </tr>
-  % end
-    </tbody>
-  </table>
-  
+  <p><a href="/admin" class="button">Admin Panel</a> <noscript> (JavaScript is required) </noscript> </p>
 % end
 
   <h2>Personal</h2>
@@ -63,7 +27,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
         <input type="text" name="sskey" value="{{ user.sskey }}">
       </label>
       <input type="submit" value="Modify">
-      <input type="{{ 'text' if user.id == config.USER_ADMIN else 'hidden' }}" name="username" value="{{ user.username }}">
+      <input type="hidden" name="username" value="{{ user.username }}">
     </p>
   </form>
   
@@ -74,7 +38,7 @@ Status: {{ "Active" if not user.suspended else "Suspended" }}
         <input type="password" name="password">
       </label>
       <input type="submit" value="Modify">
-      <input type="{{ 'text' if user.id == config.USER_ADMIN else 'hidden' }}" name="username" value="{{ user.username }}">
+      <input type="hidden" name="username" value="{{ user.username }}">
     </p>
     <input type="hidden" name="md5ed" value="0">
     <p id="md5alert"><b>INSECURE!</b> Hashing system failed to load. Your password will be transferred as-is. Make sure you have enabled JavaScript.</p>

@@ -26,7 +26,10 @@ class User:
         self.meta = {}
         if dbRow:
             [self.id, self.username, self.salted_password, self.sskey, self.since, self.suspended, meta] = dbRow
-            self.meta = json.loads(meta)
+            try: 
+                self.meta = json.loads(meta)
+            except: 
+                pass
     
     def create(self):
         if self.id == -1:
@@ -51,12 +54,12 @@ class User:
         if len(dc) == 1:
             User.__init__(self, dc[0])
     
-    def write(self):
+    def write(self, commit=True):
         cursor.execute('UPDATE user SET username=?, password=?, sskey=?, since=?, suspended=?, meta=? WHERE id = ?',
         (
             self.username, self.salted_password, self.sskey, self.since, (1 if self.suspended else 0), json.dumps(self.meta), self.id
         ))
-        database.conn.commit()
+        if commit: database.conn.commit()
     
     def delete(self):
         cursor.execute('DELETE FROM user WHERE id = %d' % self.id)
@@ -73,8 +76,14 @@ def get_by_id(id):
     if len(dc) == 0: return None
     return User(dc[0])
     
-def get_all():
-    dc = cursor.execute('SELECT * FROM user').fetchall()
+def get_all(only_active=False):
+    where = []
+    if only_active: where.append("suspended = 0")
+    
+    query = 'SELECT * FROM user'
+    if len(where): query = query + ' WHERE ' + ' '.join(where)
+    
+    dc = cursor.execute(query).fetchall()
     return [User(row) for row in dc]
 
 def delete_users(*username):

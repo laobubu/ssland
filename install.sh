@@ -55,28 +55,30 @@ confirm () {
 # CRONJOB Install/Uninstall
     CRONFILE=/tmp/ssland.cron.tmp
     EXECCMD="cd `pwd` && ./cron.py -s"
-    crontab -l >$CRONFILE
+    EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
+    crontab -l | sed "/$EXECCMD_SEDSAFE/d" >$CRONFILE
     if confirm Use cronjob and traffic statistic; then
-        grep -q "$EXECCMD" $CRONFILE || ({ cat $CRONFILE; echo "59 23 * * * $EXECCMD"; } | crontab -)
-    else
-        grep -v "$EXECCMD" $CRONFILE | crontab -
+        echo "0 0,12 * * * $EXECCMD" >>$CRONFILE
+        echo "Notice: the statistic updates at 00:00 and 12:00. Edit this with : crontab -e"
     fi
+    cat $CRONFILE | crontab -
     rm -f $CRONFILE
+    
+    # Remove SSLand old version chain. sorry for that
+    { ( iptables -L SSLAND | grep -q "SSLAND (1 reference" ) && iptables -F SSLAND && iptables -X SSLAND; } >/dev/null 2>&1
 
 # WebSevice Install/Uninstall
     RCFILE=/etc/rc.local
-    EXECCMD="(cd `pwd` && ./web.py -d start)"
-    if confirm Start web server when system boots; then
+    EXECCMD="(cd `pwd` && ./cli.py sys update)"
+    if confirm Start web server and Shadowsocks when system boots; then
         grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
     else
-        sed -i "/$EXECCMD/d" $RCFILE
+        EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
+        sed -i "/$EXECCMD_SEDSAFE/d" $RCFILE
     fi
 
-# End of Wizard
-    echo "Start web server."
-    ./web.py -d restart
-    
-    echo "Update and start Shadowsocks."
+# End of Wizard    
+    echo "Update and start Shadowsocks, SSLand web."
     nohup ./cli.py sys update </dev/null >/dev/null 2>&1 &
     
     echo "Everything shall be ok now. Thanks for using SSLand."

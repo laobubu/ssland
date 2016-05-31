@@ -69,10 +69,6 @@ if __name__ == "__main__":
     with open(PID_FILE, 'w') as f:
         f.write(str(pid))
     
-    if flags.stat:
-        import traffic
-        traffic.stat()
-    
     if flags.instant:
         cd = get_cd()
         time.sleep(cd)
@@ -82,6 +78,15 @@ if __name__ == "__main__":
     if os.path.isfile(FLAG_FILE):
         restart_ss = True
         os.remove(FLAG_FILE)
+    
+    if flags.stat:
+        import traffic, limiter
+        traffic.stat()
+        lr = limiter.update_all()
+        if len(lr):
+            for username in lr:
+                print("[Limiter] Suspend %s : %s"%(username, lr[username]))
+            restart_ss = True
         
     if restart_ss:
         import traceback

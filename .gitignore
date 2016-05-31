@@ -4,3 +4,4 @@
 *.tmp
 user/*
 .vscode/
+typings/
