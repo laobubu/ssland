@@ -26,6 +26,8 @@ def print_help():
     user sskey {username} {sskey}
 
     sys update
+    
+    tx query      (tx = traffic)
   ''')
   sys.exit(0)
 
@@ -79,6 +81,16 @@ def run(scope, action, argv):
                     get_stdout(["./web.py", "-d", "restart"])
             except:
                 pass
+        else:
+            print_help()
+    elif scope == 'tx' or scope == 'traffic':
+        if   action == 'query':
+            import traffic, user, utils
+            un = {}
+            for u in user.get_all():
+                un[u.id] = u.username
+            for r in traffic.query(sum=traffic.QS_DAY):
+                print("%s\t%s\t%s"%(un[r[0]], r[3], utils.sizeof_fmt(r[2])))
         else:
             print_help()
     else:

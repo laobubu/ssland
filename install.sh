@@ -58,10 +58,14 @@ confirm () {
     EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
     crontab -l | sed "/$EXECCMD_SEDSAFE/d" >$CRONFILE
     if confirm Use cronjob and traffic statistic; then
-        echo "0 0 * * * $EXECCMD" >>$CRONFILE
+        echo "0 0,12 * * * $EXECCMD" >>$CRONFILE
+        echo "Notice: the statistic updates at 00:00 and 12:00. Edit this with : crontab -e"
     fi
     cat $CRONFILE | crontab -
     rm -f $CRONFILE
+    
+    # Remove SSLand old version chain. sorry for that
+    { ( iptables -L SSLAND | grep -q "SSLAND (1 reference" ) && iptables -F SSLAND && iptables -X SSLAND; } >/dev/null 2>&1
 
 # WebSevice Install/Uninstall
     RCFILE=/etc/rc.local
