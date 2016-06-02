@@ -37,12 +37,13 @@ else
     cfg=$(read2   "Shadowsocks config file" "/etc/ss.conf"  )
 
     if [ ! -f $cfg ] || confirm "File already exists. Delete and create again"; then
+        echo "You can change these later, by editing $cfg"
         ssip=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
         ssip=$(read2 "Server IP"            "$ssip"         )
         ssm=$( read2 "Cipher method"        "aes-256-cfb"   )
         ssto=$(read2 "Timeout"              "300"           )
-        echo "You can change this later, by editing $cfg"
         echo "{\"server\": \"$ssip\", \"port_password\": {}, \"timeout\": $ssto, \"method\": \"$ssm\"}"  >$cfg
+        echo "Wrote."
     fi
     
     port=$( read2 "User port formular"      "6580+id"      )
