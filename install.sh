@@ -68,13 +68,16 @@ confirm () {
     { ( iptables -L SSLAND | grep -q "SSLAND (1 reference" ) && iptables -F SSLAND && iptables -X SSLAND; } >/dev/null 2>&1
 
 # WebSevice Install/Uninstall
-    RCFILE=/etc/rc.local
+    RCFILE=/etc/rc.d/rc.local
+    RCTMP=/tmp/rclocal.tmp
     EXECCMD="(cd `pwd` && ./cli.py sys update)"
     if confirm Start web server and Shadowsocks when system boots; then
         grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
     else
         EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
-        sed -i "/$EXECCMD_SEDSAFE/d" $RCFILE
+        sed "/$EXECCMD_SEDSAFE/d" $RCFILE >$RCTMP
+        cat $RCTMP > $RCFILE
+        rm -f $RCTMP
     fi
 
 # End of Wizard    
