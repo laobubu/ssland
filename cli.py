@@ -5,6 +5,8 @@
 #
 
 import config, user
+import traffic
+import ssmgr
 from utils import *
 import sys, os, getpass
 
@@ -14,20 +16,17 @@ def print_help():
   Usage:
 
     user list
-    user add {username}
-    user add {username} {password}
-    user add {username} {password} {sskey}
-    user del {username}
-    user suspend {username}
-    user unsuspend {username}
-    user passwd {username}
-    user passwd {username} {password}
-    user sskey {username}
-    user sskey {username} {sskey}
+    user add [username] [password] [sskey]
+    user del username [username2] [...]
+    user suspend username [username2] [...]
+    user unsuspend username [username2] [...]
+    user passwd [username] [password]
+    user sskey [username] [sskey]
 
     sys update
     
     tx query      (tx = traffic)
+    tx update
   ''')
   sys.exit(0)
 
@@ -68,20 +67,25 @@ def run(scope, action, argv):
         else:
             print_help()
     elif scope == 'sys':
-        import ssmgr
         if   action == 'update':
             ssmgr.update_and_restart()
             get_stdout(["./web.py", "-d", "restart"])
+        elif action == 'init':
+            # RUN THIS WHEN SYSTEM BOOTS ONLY !
+            traffic.update_iptables()
+            get_stdout(["./web.py", "-d", "restart"])
+            ssmgr.update_and_restart()
         else:
             print_help()
     elif scope == 'tx' or scope == 'traffic':
-        import traffic
         if   action == 'query':
             un = {}
             for u in user.get_all():
                 un[u.id] = u.username
             for r in traffic.query(sum=traffic.QS_DAY):
                 print("%s\t%s\t%s"%(un[r[0]], r[3], sizeof_fmt(r[2])))
+        elif action == 'update':
+            traffic.stat()
         else:
             print_help()
     else:
