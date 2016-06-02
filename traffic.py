@@ -55,8 +55,8 @@ def update_iptables():
         get_stdout(IPTABLES + ('-I','INPUT','1','-j',CHAIN_NAME))
         get_stdout(IPTABLES + ('-I','OUTPUT','1','-j',CHAIN_NAME))
     
-    sport = set(int(r[0]) for r in re.findall(r"\bspt:(\d+)", cs, re.M))
-    dport = set(int(r[0]) for r in re.findall(r"\bdpt:(\d+)", cs, re.M))
+    sport = set(int(r) for r in re.findall(r"\bspt:(\d+)", cs, re.M))
+    dport = set(int(r) for r in re.findall(r"\bdpt:(\d+)", cs, re.M))
     
     users = user.get_all(only_active=True)
     for u in users:
