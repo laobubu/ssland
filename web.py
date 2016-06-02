@@ -264,6 +264,7 @@ if __name__ == "__main__":
             with open(DAEMON_PID_FILE, 'r') as f:
                 pid = int(f.read())
                 os.kill(pid, signal.SIGTERM)
+                print("Stopped PID %d" % pid)
             os.remove(DAEMON_PID_FILE)
         except:
             pass

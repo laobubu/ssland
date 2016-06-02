@@ -96,5 +96,6 @@ fi
 # End of Wizard    
     echo "Update and start Shadowsocks, SSLand web."
     ./cli.py sys init
+    ./web.py -d restart
     
     echo "Everything shall be ok now. Thanks for using SSLand."
