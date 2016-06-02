@@ -24,7 +24,7 @@
     <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
 
         <nav class="uk-navbar uk-margin-large-bottom">
-            <span class="uk-navbar-brand uk-hidden-small">SSLand Admin</span>
+            <a class="uk-navbar-brand uk-hidden-small" href="https://github.com/laobubu/ssland" target="_blank">SSLand Admin</a>
             <ul class=" uk-navbar-nav" data-uk-switcher="{connect:'#main-ptl'}">
                 <li class="uk-active"><a href="">User</a></li>
                 <li><a href="">Limiter</a></li>
@@ -40,7 +40,7 @@
             </div>
 
             <div class="uk-navbar-flip uk-navbar-content">
-                <button onclick="sys_restart" class="uk-button uk-button-primary" type="button">Restart SS</button>
+                <button onclick="sys_restart" data-uk-tooltip title="Update config, restart Shadowsocks and SSLand" class="uk-button uk-button-primary" type="button">Restart SS</button>
             </div>
         </nav>
 
