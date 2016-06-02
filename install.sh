@@ -70,7 +70,7 @@ confirm () {
 # WebSevice Install/Uninstall
     RCFILE=/etc/rc.d/rc.local
     RCTMP=/tmp/rclocal.tmp
-    EXECCMD="(cd `pwd` && ./cli.py sys update)"
+    EXECCMD="(cd `pwd` && ./cli.py sys init)"
     if confirm Start web server and Shadowsocks when system boots; then
         grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
     else

@@ -16,15 +16,10 @@ CHAIN_NAME = 'SSLAND2'
 def stat():
     '''
     Get the stat data and storage into database.
-    Add IPTABLES rules if necessary.
     '''
+    update_iptables()
     cs, ec = get_stdout(IPTABLES + ('-nxvL', CHAIN_NAME)) # get current stat
     if ec == 3: return False   # No privilege
-    if ec == 1: # chain not found
-        # create the chain
-        get_stdout(IPTABLES + ('-N',CHAIN_NAME))
-        get_stdout(IPTABLES + ('-I','INPUT','1','-j',CHAIN_NAME))
-        get_stdout(IPTABLES + ('-I','OUTPUT','1','-j',CHAIN_NAME))
     get_stdout(IPTABLES + ('-Z',CHAIN_NAME)) # empty IPTABLES stat
     
     t  = {}  # dict PORT=>(pkgs, bytes)
@@ -42,14 +37,32 @@ def stat():
         if port in t:
             ti = t[port]
             if ti[0] and ti[1]: query.append((u.id, ti[0], ti[1]))      # skip empty record
-        else:
-            get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--sport',str(port)))
-            get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--dport',str(port)))
             
     cursor = database.conn.cursor()
     cursor.executemany('INSERT INTO traffic(user,packages,traffic) VALUES (?, ?, ?)', query)
     cursor.close()
     database.conn.commit()
+
+def update_iptables():
+    '''
+    Add IPTABLES rules if necessary.
+    '''
+    cs, ec = get_stdout(IPTABLES + ('-nxvL', CHAIN_NAME)) # get current stat
+    if ec == 3: return False   # No privilege
+    if ec == 1: # chain not found
+        # create the chain
+        get_stdout(IPTABLES + ('-N',CHAIN_NAME))
+        get_stdout(IPTABLES + ('-I','INPUT','1','-j',CHAIN_NAME))
+        get_stdout(IPTABLES + ('-I','OUTPUT','1','-j',CHAIN_NAME))
+    
+    sport = set(int(r[0]) for r in re.findall(r"\bspt:(\d+)", cs, re.M))
+    dport = set(int(r[0]) for r in re.findall(r"\bdpt:(\d+)", cs, re.M))
+    
+    users = user.get_all(only_active=True)
+    for u in users:
+        port = config.user_port(u.id)
+        if not port in sport:   get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--sport',str(port)))
+        if not port in dport:   get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--dport',str(port)))
 
 QS_NONE=0
 QS_ALL=1

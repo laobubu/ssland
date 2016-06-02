@@ -5,6 +5,8 @@
 #
 
 import config, user
+import traffic
+import ssmgr
 from utils import *
 import sys, os, getpass
 
@@ -68,14 +70,17 @@ def run(scope, action, argv):
         else:
             print_help()
     elif scope == 'sys':
-        import ssmgr
         if   action == 'update':
             ssmgr.update_and_restart()
             get_stdout(["./web.py", "-d", "restart"])
+        elif action == 'init':
+            # RUN THIS WHEN SYSTEM BOOTS ONLY !
+            traffic.update_iptables()
+            get_stdout(["./web.py", "-d", "restart"])
+            ssmgr.update_and_restart()
         else:
             print_help()
     elif scope == 'tx' or scope == 'traffic':
-        import traffic
         if   action == 'query':
             un = {}
             for u in user.get_all():
