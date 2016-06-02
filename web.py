@@ -10,6 +10,8 @@ import config, user
 import bottle
 import json, sys, os
 import utils
+import ssmgr
+import pyqrcode, io, base64
 from bottle import route, get, post, run, template, redirect, static_file, response, request
 from functools import wraps
 
@@ -72,7 +74,14 @@ def get_salted_password():
     return password
 
 # home panel Generator
-get_home_content = lambda msg='': template('home', config=config, user=current_user, is_admin=is_admin, message=msg)
+get_home_content = lambda msg='': template(
+    'home', 
+    config=config, 
+    user=current_user, 
+    is_admin=is_admin, 
+    message=msg,
+    ssconf=ssmgr.conf_cache
+)
 
 
 
@@ -81,7 +90,23 @@ get_home_content = lambda msg='': template('home', config=config, user=current_u
 @route('/')
 @require_login
 def server_index():
+    ssmgr.read_conf()
     return get_home_content()
+    
+@route('/qr.svg')
+@require_login
+def server_qr():
+    ssmgr.read_conf()
+    qr = pyqrcode.create('ss://' + base64.b64encode('%s:%s@%s:%d'%(
+        ssmgr.conf_cache['method'],
+        current_user.sskey,
+        ssmgr.conf_cache['server'],
+        config.user_port( current_user.id )
+    )))
+    out = io.BytesIO()
+    qr.svg(out, scale=5)
+    response.content_type = 'image/svg+xml'
+    return out.getvalue()
 
 @post('/passwd')
 @require_login
