@@ -71,14 +71,16 @@ confirm () {
     RCFILE=/etc/rc.local
     RCTMP=/tmp/rclocal.tmp
     EXECCMD="(cd `pwd` && ./cli.py sys init)"
+    EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
+    cat $RCFILE > $RCTMP
     if confirm Start web server and Shadowsocks when system boots; then
-        grep -q "$EXECCMD" $RCFILE || (echo "$EXECCMD" >>$RCFILE)
+        sed -i "/exit\\b/i$EXECCMD" $RCTMP
+        grep -q "$EXECCMD" $RCTMP || (echo "$EXECCMD" >>$RCTMP)
     else
-        EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
-        sed "/$EXECCMD_SEDSAFE/d" $RCFILE >$RCTMP
-        cat $RCTMP > $RCFILE
-        rm -f $RCTMP
+        sed -i "/$EXECCMD_SEDSAFE/d" $RCTMP
     fi
+    cat $RCTMP > $RCFILE
+    rm -f $RCTMP
 
 # End of Wizard    
     echo "Update and start Shadowsocks, SSLand web."
