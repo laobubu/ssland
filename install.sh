@@ -6,6 +6,26 @@ type python   >/dev/null 2>&1 || { echo "Python not found. Aborting." >&2;     e
 type pip      >/dev/null 2>&1 || { echo "Python pip not found. Aborting." >&2; exit 1; }
 type ssserver >/dev/null 2>&1 || { pip install shadowsocks; }
 
+
+
+confirm () {
+    while true; do
+        read -p "$*? (yes/no): " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+}
+
+
+read2 () {
+    read -p "$1 [ default: $2 ] = " xi
+    echo ${xi:-$2}
+}
+
+
 pip install -r requirements.txt
 
 if grep -q WIZARD_GENERATED config.py; then
@@ -14,18 +34,19 @@ if grep -q WIZARD_GENERATED config.py; then
 
 else
 
-    default_cfg=/etc/ss.conf
-    read -p "Shadowsocks config file [ default: $default_cfg ] = " cfg
-    cfg=${cfg:-$default_cfg}
+    cfg=$(read2   "Shadowsocks config file" "/etc/ss.conf"  )
 
-    [ -f $cfg ] && echo "WARNING: File exists." || \
-        echo "The encrypt method is aes-256-cfb. You can change this later by editing $cfg"
-
-    read -p "User port formular [ default: 6580+id ] = " port
-    port=${port:-6580+id}
+    if [ ! -f $cfg ] || confirm "File already exists. Delete and create again"; then
+        ssip=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
+        ssip=$(read2 "Server IP"            "$ssip"         )
+        ssm=$( read2 "Cipher method"        "aes-256-cfb"   )
+        ssto=$(read2 "Timeout"              "300"           )
+        echo "You can change this later, by editing $cfg"
+        echo "{\"server\": \"$ssip\", \"port_password\": {}, \"timeout\": $ssto, \"method\": \"$ssm\"}"  >$cfg
+    fi
     
-    read -p "SSLand web port [ default: 8080 ] = " wport
-    wport=${wport:-8080}
+    port=$( read2 "User port formular"      "6580+id"      )
+    wport=$(read2 "SSLand web port"         "8080"         )
 
     sed config.py -r -i                                             \
         -e "s|^USER_SALT.+$|USER_SALT='`openssl rand -base64 16`'|" \
@@ -40,17 +61,6 @@ else
     git commit -am "Custom configuration snapshot" >/dev/null 2>&1
 
 fi
-
-confirm () {
-    while true; do
-        read -p "$*? (yes/no): " yn
-        case $yn in
-            [Yy]* ) return 0;;
-            [Nn]* ) return 1;;
-            * ) echo "Please answer yes or no.";;
-        esac
-    done
-}
 
 # CRONJOB Install/Uninstall
     CRONFILE=/tmp/ssland.cron.tmp
