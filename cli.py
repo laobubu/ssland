@@ -71,14 +71,7 @@ def run(scope, action, argv):
         import ssmgr
         if   action == 'update':
             ssmgr.update_and_restart()
-            
-            try:
-                with open(config.TMP_ROOT + "/ssland.web.pid", 'r') as f:
-                    pid = int(f.read())
-                    os.kill(pid, 0)
-                    get_stdout(["./web.py", "-d", "restart"])
-            except:
-                pass
+            get_stdout(["./web.py", "-d", "restart"])
         else:
             print_help()
     elif scope == 'tx' or scope == 'traffic':
