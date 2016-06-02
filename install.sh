@@ -95,6 +95,6 @@ fi
 
 # End of Wizard    
     echo "Update and start Shadowsocks, SSLand web."
-    nohup ./cli.py sys update </dev/null >/dev/null 2>&1 &
+    ./cli.py sys init
     
     echo "Everything shall be ok now. Thanks for using SSLand."
