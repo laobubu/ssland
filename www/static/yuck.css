@@ -56,27 +56,15 @@ button:focus, input[type=submit]:focus
     border-collapse: collapse;
 }
 
-#admin-table {
-    width: 100%;
-    border: 0;
-    border-spacing: 0;
-    border-collapse: collapse;
+img#qr {
+    float: right;
+    background: #FFF;
 }
 
-#admin-table tr {
-    text-align: left;
-    padding: 5px;
+#psscfg {
+    color: #999;
 }
 
-#admin-table tr:nth-child(2n+1) {
-    background-color: #F9F9F9;
-}
-
-#admin-table th, #admin-table td {
-    padding: 5px 10px;
-}
-
-#clicmd {
-    width: 100%;
-    box-sizing: border-box;
+pre .major {
+    color: #000;
 }
