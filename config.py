@@ -9,7 +9,7 @@ from tempfile import gettempdir
 # Your Shadowsocks Path
 #  SS_EXEC     - The full command starting ssserver, without "-d start".
 #  SS_CONF     - The Shadowsocks config file which SSLand will manage.
-SS_EXEC = ["sudo", "ssserver", "-c", "/etc/ss.conf"]
+SS_EXEC = ["ssserver", "-c", "/etc/ss.conf"]
 SS_CONF = "/etc/ss.conf"
 
 # User Configuration

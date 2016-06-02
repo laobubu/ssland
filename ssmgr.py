@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 import json, os, sys
-from subprocess import Popen
+import utils
 import config
 import user
 
@@ -34,4 +34,4 @@ def update_and_restart():
     Update Shadowsocks Config file, then restart shadowsocks.
     '''
     update_conf()
-    Popen(config.SS_EXEC + ["-d", "restart"])
+    utils.get_stdout(config.SS_EXEC + ["-d", "restart"])

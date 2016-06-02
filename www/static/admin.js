@@ -105,7 +105,7 @@ $('#user_add').submit(function () {
 
 
 $('#traffic-view').submit(function() {
-    alert('Not implemented yet')
+    alert('Not implemented yet. Use CLI Command "tx query" to query.')
     return false;
 })
 
