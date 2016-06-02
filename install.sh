@@ -68,7 +68,7 @@ confirm () {
     { ( iptables -L SSLAND | grep -q "SSLAND (1 reference" ) && iptables -F SSLAND && iptables -X SSLAND; } >/dev/null 2>&1
 
 # WebSevice Install/Uninstall
-    RCFILE=/etc/rc.d/rc.local
+    RCFILE=/etc/rc.local
     RCTMP=/tmp/rclocal.tmp
     EXECCMD="(cd `pwd` && ./cli.py sys init)"
     if confirm Start web server and Shadowsocks when system boots; then
