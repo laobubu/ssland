@@ -85,7 +85,7 @@ fi
     EXECCMD_SEDSAFE=$(echo "$EXECCMD" | sed 's/\//\\\//g')
     cat $RCFILE > $RCTMP
     if confirm Start web server and Shadowsocks when system boots; then
-        sed -i "/exit\\b/i$EXECCMD" $RCTMP
+        sed -i "/^\\s*exit\\b/i$EXECCMD" $RCTMP
         grep -q "$EXECCMD" $RCTMP || (echo "$EXECCMD" >>$RCTMP)
     else
         sed -i "/$EXECCMD_SEDSAFE/d" $RCTMP
