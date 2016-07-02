@@ -112,13 +112,21 @@ function new_user_gen() {
 }
 $('#user_add').submit(function () {
     var un = $('#user_add [name=username]').val();
-    if (app.users.some(function(ck) {return ck.username == un})) return false;
+    if (app.users.some(function(ck) {return ck.username == un})) {
+        alert('User exists');
+        return false;
+    }
     
     api('user/add', {
         sskey: $('#user_add [name=sskey]').val(),
         username: un,
         password: $('#user_add [name=password]').val()
-    }, reload_users);
+    }, function(){
+        UIkit.notify('User created. Please apply to SS');
+        $('#user_add [name=password]').val('');
+        $('#useradd').hide('');
+        reload_users();
+    });
     return false;
 })
 
