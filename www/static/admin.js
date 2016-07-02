@@ -27,19 +27,30 @@ app = new Vue({
     el: '#main-ptl',
     data: app,
     methods: {
-        suspend: function (i) {
+        suspend: function (i,ev) {
             var u = app.users[i];
-            api('user/suspend', { username: u.username, suspend: u.suspended ? 0 : 1 }, function (rtn) { u.suspended = rtn.suspended ? true : false })
+            var reason = (!u.suspended && !ev.ctrlKey) ? prompt("Reason to suspend?\n (Click the button with Ctrl to skip this)") : "";
+            if (reason === null) return;
+            api('user/suspend', { 
+                username: u.username, 
+                suspend: u.suspended ? 0 : 1,
+                reason: reason 
+            }, function (rtn) { u.suspended = rtn.suspended ? true : false })
         },
         user_del: function (i) {
             var u = app.users[i];
             if (!confirm('Delete user ' + u.username + '?')) return false;
             api('user/del', { username: u.username }, function (rtn) { app.users.splice(i, 1); })
         },
-        lim_open: function (i) {
+        lim_open: function (i,ev) {
             app.app.uindex = i;
             app.app.limit = (app.users[i].meta.limit || []).slice();
-            setTimeout(function() { UIkit.switcher('#main-ptl').show(1); }, 100);
+            var ref = $(ev.target.parentElement.parentElement);
+            if (ref[0].nextElementSibling == limEditor[0]) limEditor.toggle();
+            else {
+                limEditor.insertAfter(ref);
+                limEditor.show();
+            }
         },
         tiblur: function (ev, obj, par) {
             ev.target.value = obj[par]
@@ -92,12 +103,19 @@ $('#passwd form').submit(function () {
     return false;
 })
 
+
+function new_user_gen() {
+    setTimeout(function() {
+        $('#user_add [name=username]').focus();
+        $('#user_add [name=sskey]').val(md5(Math.random()));
+    }, 100);
+}
 $('#user_add').submit(function () {
     var un = $('#user_add [name=username]').val();
     if (app.users.some(function(ck) {return ck.username == un})) return false;
     
     api('user/add', {
-        sskey: $('#user_add [name=sskey]   ').val(),
+        sskey: $('#user_add [name=sskey]').val(),
         username: un,
         password: $('#user_add [name=password]').val()
     }, reload_users);
@@ -109,6 +127,8 @@ $('#traffic-view').submit(function() {
     alert('Not implemented yet. Use CLI Command "tx query" to query.')
     return false;
 })
+
+var limEditor = $('#lim-editor').hide();
 
 var limSinceFormat = /^(this-(week|month)|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/;
 $('#lim-editor-submit').click(function() {
@@ -126,7 +146,7 @@ $('#lim-editor-submit').click(function() {
         username: u.username,
         limit: JSON.stringify(app.app.limit)
     }, function(){
-        UIkit.notify('Modified');
+        UIkit.notify('Restriction rules are confirmed.');
         u.meta.limit = app.app.limit.slice();
     })
     return false;

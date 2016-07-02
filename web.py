@@ -11,6 +11,7 @@ import bottle
 import json, sys, os
 import utils
 import ssmgr
+import datetime
 import pyqrcode, io, base64
 from bottle import route, get, post, run, template, redirect, static_file, response, request
 from functools import wraps
@@ -219,10 +220,13 @@ def admin_user_limit():
 
 @admin_api('/admin/user/suspend')
 def admin_user_suspend():
-    username, suspend = [request.forms.get(n) for n in ('username', 'suspend')]
+    username, suspend, reason = [request.forms.get(n) for n in ('username', 'suspend', 'reason')]
     
     u = user.get_by_username(username)
     u.suspended = suspend == "1"
+    if reason:
+        datestr = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        u.set_meta("limiter_log", "%s: %s"%(datestr, reason))
     u.write()
     return { "username": username, "suspended": u.suspended }
 
