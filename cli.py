@@ -36,7 +36,7 @@ def run(scope, action, argv):
             print("id\tusername\tsuspended\tport\tsskey")
             for u in user.get_all():
                 print('\t'.join(( str(item) for item in 
-                    (u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey)
+                    (u.id, u.username, 'True' if u.suspended else 'False', u.get_port(), u.sskey)
                 )))
         elif action == 'add':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')

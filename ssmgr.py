@@ -33,7 +33,7 @@ def update_conf():
     pp = {}
     for u in user.get_all(only_active=True):
         if not len(u.sskey): continue
-        port = str(config.user_port(u.id))
+        port = str(u.get_port())
         pp[port] = u.sskey
     conf_cache['port_password'] = pp
     write_conf()

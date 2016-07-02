@@ -64,6 +64,16 @@ class User:
     def delete(self):
         cursor.execute('DELETE FROM user WHERE id = %d' % self.id)
         database.conn.commit()
+    
+    def get_port(self):
+        default_port = config.user_port(self.id)
+        try:
+            return int(self.get_meta("port")) or default_port
+        except:
+            return default_port
+    
+    def set_port(self, port):
+        self.set_meta('port', port)
 
 def get_by_username(username):
     if not is_good_username(username): return None

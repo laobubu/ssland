@@ -11,7 +11,7 @@
   
   <pre id="psscfg">{
     "<span class="major">server</span>":     "<span class="major">{{ ssconf['server'] }}</span>",
-    "<span class="major">server_port</span>": <span class="major">{{ config.user_port(user.id) }}</span>,
+    "<span class="major">server_port</span>": <span class="major">{{ user.get_port() }}</span>,
     "<span class="major">password</span>":   "<span class="major">{{ user.sskey }}</span>",
     "<span class="major">method</span>":     "<span class="major">{{ ssconf['method'] }}</span>",
 

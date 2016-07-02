@@ -101,7 +101,7 @@ def server_qr():
         ssmgr.conf_cache['method'],
         current_user.sskey,
         ssmgr.conf_cache['server'],
-        config.user_port( current_user.id )
+        current_user.get_port()
     )))
     out = io.BytesIO()
     qr.svg(out, scale=5)
@@ -177,9 +177,11 @@ def admin_user_del():
 
 @admin_api('/admin/user/list')
 def admin_user_list():
-    list = [ u.__dict__ for u in user.get_all()]
-    for i in range(len(list)):
-        list[i]['port'] = config.user_port(list[i]['id'])
+    list = []
+    for u in user.get_all():
+        ui = u.__dict__
+        ui['port'] = u.get_port()
+        list.append(ui)
     return { "list": list }
 
 @admin_api('/admin/user/passwd')
