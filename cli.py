@@ -25,7 +25,8 @@ def print_help():
 
     sys update
     
-    tx query      (tx = traffic)
+    (tx = traffic)
+    tx query [username]
     tx update
   ''')
   sys.exit(0)
@@ -80,9 +81,12 @@ def run(scope, action, argv):
     elif scope == 'tx' or scope == 'traffic':
         if   action == 'query':
             un = {}
+            uid = -1
             for u in user.get_all():
                 un[u.id] = u.username
-            for r in traffic.query(sum=traffic.QS_DAY):
+                if len(argv) > 0 and u.username == argv[0] :
+                    uid = u.id
+            for r in traffic.query(uid=uid,sum=traffic.QS_DAY):
                 print("%s\t%s\t%s"%(un[r[0]], r[3], sizeof_fmt(r[2])))
         elif action == 'update':
             traffic.stat()
