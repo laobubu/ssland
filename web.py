@@ -11,6 +11,7 @@ import bottle
 import json, sys, os
 import utils
 import ssmgr
+import datetime
 import pyqrcode, io, base64
 from bottle import route, get, post, run, template, redirect, static_file, response, request
 from functools import wraps
@@ -101,7 +102,7 @@ def server_qr():
         ssmgr.conf_cache['method'],
         current_user.sskey,
         ssmgr.conf_cache['server'],
-        config.user_port( current_user.id )
+        current_user.get_port()
     )))
     out = io.BytesIO()
     qr.svg(out, scale=5)
@@ -177,9 +178,11 @@ def admin_user_del():
 
 @admin_api('/admin/user/list')
 def admin_user_list():
-    list = [ u.__dict__ for u in user.get_all()]
-    for i in range(len(list)):
-        list[i]['port'] = config.user_port(list[i]['id'])
+    list = []
+    for u in user.get_all():
+        ui = u.__dict__
+        ui['port'] = u.get_port()
+        list.append(ui)
     return { "list": list }
 
 @admin_api('/admin/user/passwd')
@@ -192,9 +195,17 @@ def admin_user_passwd():
 
 @admin_api('/admin/user/sskey')
 def admin_user_sskey():
-    username, sskey = [request.forms.get(n) for n in ('username', 'sskey')]
+    username, sskey = [request.forms.get(n) for n in ('username', 'value')]
     u = user.get_by_username(username)
     u.sskey = sskey
+    u.write()
+    return { "status": "ok" }
+
+@admin_api('/admin/user/port')
+def admin_user_port():
+    username, port = [request.forms.get(n) for n in ('username', 'value')]
+    u = user.get_by_username(username)
+    u.set_port(port)
     u.write()
     return { "status": "ok" }
 
@@ -209,10 +220,13 @@ def admin_user_limit():
 
 @admin_api('/admin/user/suspend')
 def admin_user_suspend():
-    username, suspend = [request.forms.get(n) for n in ('username', 'suspend')]
+    username, suspend, reason = [request.forms.get(n) for n in ('username', 'suspend', 'reason')]
     
     u = user.get_by_username(username)
     u.suspended = suspend == "1"
+    if reason:
+        datestr = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        u.set_meta("limiter_log", "%s: %s"%(datestr, reason))
     u.write()
     return { "username": username, "suspended": u.suspended }
 

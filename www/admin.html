@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/datepicker.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/notify.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/tooltip.gradient.min.css">
+    <link rel="stylesheet" href="static/admin.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/uikit.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/datepicker.min.js"></script>
@@ -27,7 +28,6 @@
             <a class="uk-navbar-brand uk-hidden-small" href="https://github.com/laobubu/ssland" target="_blank">SSLand Admin</a>
             <ul class=" uk-navbar-nav" data-uk-switcher="{connect:'#main-ptl'}">
                 <li class="uk-active"><a href="">User</a></li>
-                <li><a href="">Limiter</a></li>
                 <li><a href="">Traffic</a></li>
                 <li><a href="">System</a></li>
             </ul>
@@ -40,13 +40,20 @@
             </div>
 
             <div class="uk-navbar-flip uk-navbar-content">
-                <button onclick="sys_restart()" data-uk-tooltip title="Update config, restart Shadowsocks and SSLand" class="uk-button uk-button-primary" type="button">Restart SS</button>
+                <button 
+                    onclick="sys_restart()" 
+                    data-uk-tooltip title="Write into config file, then restart Shadowsocks and SSLand" 
+                    class="uk-button uk-button-primary" 
+                    type="button"
+                    >Apply to Shadowsocks</button>
             </div>
         </nav>
 
         <ul id="main-ptl" class="uk-switcher">
             <li>
-                <h2>User List</h2>
+                <h2>
+                    Users <button onclick="new_user_gen()" data-uk-modal="{target:'#useradd'}" class="uk-button uk-button-small" type="button"><i class="uk-icon-plus"></i> Add</button>
+                </h2>
                 <table class="uk-table">
                     <thead>
                         <tr>
@@ -57,17 +64,58 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr id="lim-editor">
+                            <td colspan="4">
+                                <div class="uk-form">
+                                    <ul class="uk-list uk-list-striped">
+                                        <li style="text-align:center;font-size:.87em">
+                                            <button data-uk-tooltip title="Add a rule" @click="app.limit.push({type:'traffic', amount:0, since:''})" type="button" class="uk-button uk-button-small"><i class="uk-icon-plus"></i> Add</button>
+                                            <button data-uk-tooltip title="Remove all rules" @click="app.limit=[]" type="button" class="uk-button uk-button-small"><i class="uk-icon-trash-o"></i> Empty</button>
+                                            <button data-uk-tooltip title="Confirm your modification" type="button" class="uk-button uk-button-small" id="lim-editor-submit"><i class="uk-icon-check"></i> Done</button>
+                                            <button data-uk-tooltip title="Revert all modifictaion since the last confirmation" @click="app.limit = users[app.uindex].meta.limit.slice()" type="button" class="uk-button uk-button-small" id="lim-read"><i class="uk-icon-undo"></i> Reset</button>
+                                        </li>
+                                        <li style="text-align:center" v-show="app.limit.length == 0">No restriction</li>
+                                        <li v-for="r in app.limit">
+                                            <button @click="app.limit.splice($index,1)" type="button" class="uk-button"><i class="uk-icon-close"></i></button>
+                                            <select v-model="r.type">
+                                                <option value="time">Time</option>
+                                                <option value="traffic">Traffic</option>
+                                            </select>
+                                            <span v-if="r.type=='time'">
+                                                Suspended when 
+                                            </span>
+                                            <span v-if="r.type=='traffic'">
+                                                Suspended if the user spend 
+                                                <input type="number" v-model="r.amount">
+                                                bytes since
+                                            </span> 
+                                            <input type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(input here)" v-model="r.since">
+                                            <select v-model="r.since">
+                                                <option value="">(a specified time)</option>
+                                                <option value="this-month">(first day of this month)</option>
+                                                <option value="this-week">(first day of this week)</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
                         <tr v-for="u in users">
                             <td>
                                 {{ u.username }}
                                 <span v-if="u.suspended" class="uk-badge" data-uk-tooltip :title="u.meta.limiter_log || ''">Suspended</span>
-                            <td>{{ u.port }}</td>
-                            <td>{{ u.sskey }}</td>
                             <td>
-                                <button @click="suspend($index)" class="uk-button uk-button-small" type="button">{{ u.suspended && "Unsuspend" || "Suspend" }}</button>
+                                <input type="text" class="table-input" :value="u.port" @blur="tiblur($event,u,'port')" @keypress="ticonfirm($event,u,'port','user/port',{'username':u.username})">
+                                <div class="table-input-notice">Press Enter to confirm</div>
+                            </td>
+                            <td>
+                                <input type="text" class="table-input" :value="u.sskey" @blur="tiblur($event,u,'sskey')" @keypress="ticonfirm($event,u,'sskey','user/sskey',{'username':u.username})">
+                                <div class="table-input-notice">Press Enter to confirm</div>
+                            </td>
+                            <td>
+                                <button @click="suspend($index,$event)" class="uk-button uk-button-small" type="button">{{ u.suspended && "Unsuspend" || "Suspend" }}</button>
                                 <button @click="app.uindex=$index" data-uk-modal="{target:'#passwd'}" class="uk-button uk-button-small" type="button">Password</button>
-                                <button @click="app.uindex=$index" data-uk-modal="{target:'#sskey'}" class="uk-button uk-button-small" type="button">SSKey</button>
-                                <button @click="lim_open($index)" class="uk-button uk-button-small" type="button">Limit</button>
+                                <button @click="lim_open($index,$event)" class="uk-button uk-button-small" type="button">Limit</button>
                                 <button @click="user_del($index)" class="uk-button uk-button-small" type="button">Delete</button>
                             </td>
                         </tr>
@@ -89,71 +137,18 @@
                     </div>
                 </div>
                 
-                <div id="sskey" class="uk-modal">
+                <div id="useradd" class="uk-modal">
                     <div class="uk-modal-dialog">
                         <a class="uk-modal-close uk-close"></a>
-                        <form class="uk-form">
-                        <p>Shadowsocks Key for {{ users[app.uindex].username }}</p>
-                        <p>
-                            <input type="text" placeholder="" class="uk-width-4-5" name="sskey" :value="users[app.uindex].sskey">
-                            <input type="hidden" name="username" :value="users[app.uindex].username">
-                            <button type="submit" class="uk-button uk-button-primary">Modify</button>
-                        </p>
+                        <form id="user_add" class="uk-form uk-form-horizontal">
+                            <div class="uk-form-row"><label class="uk-form-label">Username </label><div class="uk-form-controls"><input required type="text" name="username"></div></div>
+                            <div class="uk-form-row"><label class="uk-form-label">Password </label><div class="uk-form-controls"><input required type="password" name="password"></div></div>
+                            <div class="uk-form-row"><label class="uk-form-label">SSKey    </label><div class="uk-form-controls"><input required type="text" name="sskey"></div></div>
+                            <div class="uk-form-row"><div class="uk-form-controls"><input type="hidden" name="md5ed"><button type="submit" class="uk-button">Create User</button></div></div>
                         </form>
                     </div>
                 </div>
                 
-                <h2>Add User</h2>
-                
-                <form id="user_add" class="uk-form uk-form-stacked">
-                    <div class="uk-form-row"><label class="uk-form-label">Username </label><input required class="uk-form-controls" type="text" name="username"></div>
-                    <div class="uk-form-row"><label class="uk-form-label">Password </label><input required class="uk-form-controls" type="password" name="password"></div>
-                    <div class="uk-form-row"><label class="uk-form-label">SSKey </label><input required class="uk-form-controls" type="text" name="sskey"></div>
-                    <div class="uk-form-row">
-                        <input type="hidden" name="md5ed">
-                        <button type="submit" class="uk-button">Create User</button>
-                    </div>
-                </form>
-            </li>
-            <li>
-                <h2>Limitation Editor</h2>
-                <div class="uk-form">
-                    <p>The user is restricted by</p>
-                    <ul class="uk-list uk-list-striped">
-                        <li v-for="r in app.limit">
-                            <button @click="app.limit.splice($index,1)" type="button" class="uk-button"><i class="uk-icon-close"></i></button>
-                            <select v-model="r.type">
-                                <option value="time">Time</option>
-                                <option value="traffic">Traffic</option>
-                            </select>
-                            <span v-if="r.type=='time'">
-                                Suspended when 
-                            </span>
-                            <span v-if="r.type=='traffic'">
-                                Suspended if the user spend 
-                                <input type="number" v-model="r.amount">
-                                bytes since
-                            </span> 
-                            <input type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(input here)" v-model="r.since">
-                            <select v-model="r.since">
-                                <option value="">(a specified time)</option>
-                                <option value="this-month">(this month)</option>
-                                <option value="this-week">(this week)</option>
-                            </select>
-                        </li>
-                        <li>
-                             <button @click="app.limit.push({type:'traffic', amount:0, since:''})" type="button" class="uk-button uk-button-small"><i class="uk-icon-plus"></i> Add</button>
-                             <button @click="app.limit=[]" type="button" class="uk-button uk-button-small"><i class="uk-icon-trash-o"></i> Empty</button>
-                        </li>
-                    </ul>
-                    <p>
-                        <select v-model="app.uindex">
-                            <option :value="$index" v-for="u in users">{{ u.username }}</option>
-                        </select>
-                        <button type="button" class="uk-button uk-button-primary" id="lim-editor-submit">Apply to {{ users[app.uindex].username }}</button>
-                        <button @click="app.limit = users[app.uindex].meta.limit.slice()" type="button" class="uk-button" id="lim-read">Read from {{ users[app.uindex].username }}</button>
-                    </p>
-                </div>
             </li>
             <li>
                 <h2>Traffic View</h2>

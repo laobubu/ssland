@@ -33,7 +33,7 @@ def stat():
     query = []
     users = user.get_all(only_active=True)
     for u in users:
-        port = config.user_port(u.id)
+        port = u.get_port()
         if port in t:
             ti = t[port]
             if ti[0] and ti[1]: query.append((u.id, ti[0], ti[1]))      # skip empty record
@@ -60,7 +60,7 @@ def update_iptables():
     
     users = user.get_all(only_active=True)
     for u in users:
-        port = config.user_port(u.id)
+        port = u.get_port()
         if not port in sport:   get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--sport',str(port)))
         if not port in dport:   get_stdout(IPTABLES + ('-A',CHAIN_NAME,'-p','tcp','--dport',str(port)))
 

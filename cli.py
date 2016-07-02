@@ -25,7 +25,8 @@ def print_help():
 
     sys update
     
-    tx query      (tx = traffic)
+    (tx = traffic)
+    tx query [username]
     tx update
   ''')
   sys.exit(0)
@@ -36,7 +37,7 @@ def run(scope, action, argv):
             print("id\tusername\tsuspended\tport\tsskey")
             for u in user.get_all():
                 print('\t'.join(( str(item) for item in 
-                    (u.id, u.username, 'True' if u.suspended else 'False', config.user_port(u.id), u.sskey)
+                    (u.id, u.username, 'True' if u.suspended else 'False', u.get_port(), u.sskey)
                 )))
         elif action == 'add':
             username = argv[0] if len(argv) > 0 else raw_input('Username: ')
@@ -80,9 +81,12 @@ def run(scope, action, argv):
     elif scope == 'tx' or scope == 'traffic':
         if   action == 'query':
             un = {}
+            uid = -1
             for u in user.get_all():
                 un[u.id] = u.username
-            for r in traffic.query(sum=traffic.QS_DAY):
+                if len(argv) > 0 and u.username == argv[0] :
+                    uid = u.id
+            for r in traffic.query(uid=uid,sum=traffic.QS_DAY):
                 print("%s\t%s\t%s"%(un[r[0]], r[3], sizeof_fmt(r[2])))
         elif action == 'update':
             traffic.stat()
