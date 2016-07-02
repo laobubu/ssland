@@ -194,9 +194,17 @@ def admin_user_passwd():
 
 @admin_api('/admin/user/sskey')
 def admin_user_sskey():
-    username, sskey = [request.forms.get(n) for n in ('username', 'sskey')]
+    username, sskey = [request.forms.get(n) for n in ('username', 'value')]
     u = user.get_by_username(username)
     u.sskey = sskey
+    u.write()
+    return { "status": "ok" }
+
+@admin_api('/admin/user/port')
+def admin_user_port():
+    username, port = [request.forms.get(n) for n in ('username', 'value')]
+    u = user.get_by_username(username)
+    u.set_port(port)
     u.write()
     return { "status": "ok" }
 

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/datepicker.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/notify.gradient.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/components/tooltip.gradient.min.css">
+    <link rel="stylesheet" href="static/admin.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/uikit.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/components/datepicker.min.js"></script>
@@ -61,12 +62,17 @@
                             <td>
                                 {{ u.username }}
                                 <span v-if="u.suspended" class="uk-badge" data-uk-tooltip :title="u.meta.limiter_log || ''">Suspended</span>
-                            <td>{{ u.port }}</td>
-                            <td>{{ u.sskey }}</td>
+                            <td>
+                                <input type="text" class="table-input" :value="u.port" @blur="tiblur($event,u,'port')" @keypress="ticonfirm($event,u,'port','user/port',{'username':u.username})">
+                                <div class="table-input-notice">Press Enter to confirm</div>
+                            </td>
+                            <td>
+                                <input type="text" class="table-input" :value="u.sskey" @blur="tiblur($event,u,'sskey')" @keypress="ticonfirm($event,u,'sskey','user/sskey',{'username':u.username})">
+                                <div class="table-input-notice">Press Enter to confirm</div>
+                            </td>
                             <td>
                                 <button @click="suspend($index)" class="uk-button uk-button-small" type="button">{{ u.suspended && "Unsuspend" || "Suspend" }}</button>
                                 <button @click="app.uindex=$index" data-uk-modal="{target:'#passwd'}" class="uk-button uk-button-small" type="button">Password</button>
-                                <button @click="app.uindex=$index" data-uk-modal="{target:'#sskey'}" class="uk-button uk-button-small" type="button">SSKey</button>
                                 <button @click="lim_open($index)" class="uk-button uk-button-small" type="button">Limit</button>
                                 <button @click="user_del($index)" class="uk-button uk-button-small" type="button">Delete</button>
                             </td>
@@ -83,20 +89,6 @@
                             <input type="password" placeholder="" class="uk-width-4-5" name="password">
                             <input type="hidden" name="username" :value="users[app.uindex].username">
                             <input type="hidden" name="md5ed">
-                            <button type="submit" class="uk-button uk-button-primary">Modify</button>
-                        </p>
-                        </form>
-                    </div>
-                </div>
-                
-                <div id="sskey" class="uk-modal">
-                    <div class="uk-modal-dialog">
-                        <a class="uk-modal-close uk-close"></a>
-                        <form class="uk-form">
-                        <p>Shadowsocks Key for {{ users[app.uindex].username }}</p>
-                        <p>
-                            <input type="text" placeholder="" class="uk-width-4-5" name="sskey" :value="users[app.uindex].sskey">
-                            <input type="hidden" name="username" :value="users[app.uindex].username">
                             <button type="submit" class="uk-button uk-button-primary">Modify</button>
                         </p>
                         </form>

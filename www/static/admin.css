@@ -1,0 +1,34 @@
+.table-input {
+    border: 1px solid transparent;
+    border-radius: 2px;
+    padding: 3px 6px;
+    margin: -3px -6px;
+    background: transparent;
+    font-size: inherit;
+}
+
+.table-input-notice {
+    display: none;
+}
+
+.table-input:hover {
+    border-color: #999;
+}
+
+.table-input:focus {
+    border-color: #666;
+    box-shadow: 0 0 5px #999;
+}
+
+.table-input:focus + .table-input-notice {
+    display: block;
+    position: absolute;
+    z-index: 100;
+    background: #FFF;
+    color: #666;
+    font-size: .87em;
+    padding: .115em .5em;
+    box-shadow: 0 0 5px #999;
+    margin-top: 2px;
+    pointer-events: none;
+}

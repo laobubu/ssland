@@ -40,6 +40,19 @@ app = new Vue({
             app.app.uindex = i;
             app.app.limit = (app.users[i].meta.limit || []).slice();
             setTimeout(function() { UIkit.switcher('#main-ptl').show(1); }, 100);
+        },
+        tiblur: function (ev, obj, par) {
+            ev.target.value = obj[par]
+        },
+        ticonfirm: function (ev, obj, par, apiName, pl) {
+            if (ev.keyCode != 13) return;
+            ev.preventDefault();
+            pl = pl || {};
+            pl.value = ev.target.value;
+            api(apiName, pl, function() {
+                obj[par] = ev.target.value;
+                ev.target.blur();
+            });
         }
     }
 });
@@ -76,18 +89,6 @@ $('#passwd form').submit(function () {
         password: $('#passwd [name=password]').val(),
         username: $('#passwd [name=username]').val()
     }, _passwd_callback);
-    return false;
-})
-
-function _sskey_callback(rtn) {
-    UIkit.modal("#sskey").hide();
-    app.users[app.app.uindex].sskey = $('#sskey [name=sskey]').val();
-}
-$('#sskey form').submit(function () {
-    api('user/sskey', {
-        sskey: $('#sskey [name=sskey]   ').val(),
-        username: $('#sskey [name=username]').val()
-    }, _sskey_callback);
     return false;
 })
 
