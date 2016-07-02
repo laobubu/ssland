@@ -61,6 +61,14 @@ img#qr {
     background: #FFF;
 }
 
+@media screen and (max-width: 800px) {
+    img#qr {
+        float: none;
+        display: block;
+        margin: auto;
+    }
+}
+
 #psscfg {
     color: #999;
 }

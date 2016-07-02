@@ -19,6 +19,24 @@
     "local_port":     1080
 }</pre>
 
+% import json
+% limits = user.get_meta("limit", [])
+% if len(limits) > 0:
+
+  <p>With restrictions: </p>
+
+  <ul>
+    %for lim in limits:
+    %lt = lim['type']
+    <li>
+      {{ ("Expire when %s" % lim['since']) if lt == 'time' else '' }}
+      {{ ("Data traffic up to %.3f MB since %s" % (lim['amount']/1e6, lim['since'])) if lt == 'traffic' else '' }}
+    </li>
+    %end
+  </ul>
+
+% end
+
 % else:
 
   <p>Your account is suspended. {{ user.get_meta('limiter_log', '') }} </p>
@@ -66,6 +84,7 @@
   <p>
     <a href="/logout">Logout</a>
   </p>
+
 </div>
 
 <script> var SALT="{{ config.USER_SALT }}"; </script>
