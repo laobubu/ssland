@@ -159,7 +159,7 @@
                         <label> to   <input name="to"   type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(now)"></label>
                         <button type="submit" class="uk-button">Query</button>
                     </P>
-                    <p>Scale <input v-model="app.stat_scale" type="range" min="1" max="40" step="1"> {{app.stat_scale/10}}X</p>
+                    <p>Scale <input v-model="app.stat_scale" type="range" min="1" max="200" step="1"></p>
                     <p>Filter <input v-model="app.stat_filter" type="text" placeholder="user1|user2|user3"> (RegExp is Enabled)</p>
                 </form>
                 <div class="fk-chart">
@@ -172,7 +172,7 @@
                             v-bind:class="{ 'hidden' : app.stat_filter && !dii.title.match(app.stat_filter) }"
                             data-uk-tooltip :title="dii.title+' : '+humanFileSize(dii.amount)" 
                             class="fk-chart-ingredient" 
-                            :style="'width:'+~~(dii.amount/1e6)*app.stat_scale/10+'px'"
+                            :style="'width:'+(dii.amount/Math.pow(10,app.stat_scale/10))+'px'"
                         >{{ dii.title }}</div>
                     </div>
                 </div>

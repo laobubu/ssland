@@ -21,17 +21,8 @@ var app = {
     "app": {
         uindex: 0,
         limit: [],
-        stat: [
-            { 
-                title: "2016-05-01", 
-                data: [ 
-                    { title: "Alice", amount: 12e6 },
-                    { title: "Bob", amount: 175e6 },
-                    { title: "Carol", amount: 33e6 },
-                    { title: "Dave", amount: 192e6 }
-                ] }
-        ],
-        stat_scale: 10,
+        stat: [],
+        stat_scale: 100,
         stat_filter: ''
     }
 };
