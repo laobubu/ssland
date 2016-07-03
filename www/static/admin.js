@@ -20,7 +20,19 @@ var app = {
     ],
     "app": {
         uindex: 0,
-        limit: []
+        limit: [],
+        stat: [
+            { 
+                title: "2016-05-01", 
+                data: [ 
+                    { title: "Alice", amount: 12e6 },
+                    { title: "Bob", amount: 175e6 },
+                    { title: "Carol", amount: 33e6 },
+                    { title: "Dave", amount: 192e6 }
+                ] }
+        ],
+        stat_scale: 10,
+        stat_filter: ''
     }
 };
 app = new Vue({
@@ -64,6 +76,27 @@ app = new Vue({
                 obj[par] = ev.target.value;
                 ev.target.blur();
             });
+        },
+        humanFileSize: function (bytes, si) {
+            var thresh = si ? 1000 : 1024;
+            if(Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+            var units = si
+                ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+                : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+            var u = -1;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+            return bytes.toFixed(1)+' '+units[u];
+        },
+        sumAmount: function(arr, filter) {
+            return arr.reduce(function(prev,i){
+                if (filter && !i.title.match(filter)) return prev;
+                return (i.amount||0) + prev
+            }, 0)
         }
     }
 });
@@ -132,7 +165,14 @@ $('#user_add').submit(function () {
 
 
 $('#traffic-view').submit(function() {
-    alert('Not implemented yet. Use CLI Command "tx query" to query.')
+    var $frm = $('#traffic-view');
+    app.app.stat = [ { title: "Loading", data: [] } ]
+    api('tx/query', {
+        from: $('[name=from]', $frm).val(),
+        to: $('[name=to]', $frm).val()
+    }, function(data) {
+        app.app.stat = data;
+    })
     return false;
 })
 

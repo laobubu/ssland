@@ -11,6 +11,7 @@ import bottle
 import json, sys, os
 import utils
 import ssmgr
+import traffic
 import datetime
 import pyqrcode, io, base64
 from bottle import route, get, post, run, template, redirect, static_file, response, request
@@ -161,6 +162,20 @@ def admin_restart():
 @admin_api('/admin/basic')
 def admin_basic():
     return { "user_salt": config.USER_SALT }
+
+@admin_api('/admin/tx/query')
+def admin_tx_query():
+    tfrom, tto = [request.forms.get(n) or None for n in ('from', 'to')]
+    # Make a UID->Username table
+    un = { u.id: u.username for u in user.get_all() }
+    # Make result 
+    tresult = {}
+    for uid, pkg, tx, time in traffic.query(min_time=tfrom, max_time=tto, sum=traffic.QS_DAY):
+        if not time in tresult: tresult[time] = []
+        tresult[time].append({ "title": un[uid], "amount": tx })
+    tdays = tresult.keys()
+    tdays.sort()
+    return [ {"title": tday, "data": tresult[tday]} for tday in tdays ]
 
 @admin_api('/admin/user/add')
 def admin_user_add():
