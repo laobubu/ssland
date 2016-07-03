@@ -160,7 +160,8 @@ $('#traffic-view').submit(function() {
     app.app.stat = [ { title: "Loading", data: [] } ]
     api('tx/query', {
         from: $('[name=from]', $frm).val(),
-        to: $('[name=to]', $frm).val()
+        to: $('[name=to]', $frm).val(),
+        group: $('[name=group]', $frm).val()
     }, function(data) {
         app.app.stat = data;
     })

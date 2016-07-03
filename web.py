@@ -165,12 +165,12 @@ def admin_basic():
 
 @admin_api('/admin/tx/query')
 def admin_tx_query():
-    tfrom, tto = [request.forms.get(n) or None for n in ('from', 'to')]
+    tfrom, tto, tsum = [request.forms.get(n) or None for n in ('from', 'to', 'group')]
     # Make a UID->Username table
     un = { u.id: u.username for u in user.get_all() }
     # Make result 
     tresult = {}
-    for uid, pkg, tx, time in traffic.query(min_time=tfrom, max_time=tto, sum=traffic.QS_DAY):
+    for uid, pkg, tx, time in traffic.query(min_time=tfrom, max_time=tto, sum=int(tsum)):
         if not time in tresult: tresult[time] = []
         tresult[time].append({ "title": un[uid], "amount": tx })
     tdays = tresult.keys()

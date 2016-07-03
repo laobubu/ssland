@@ -22,6 +22,8 @@
 
 .fk-chart-row:after {
     content: attr(data-suffix);
+    display: block;
+    white-space: nowrap;
     color: #666;
     padding: 0 4px;
     font-size: .87em;
