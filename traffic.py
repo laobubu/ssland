@@ -69,6 +69,7 @@ QS_ALL=1
 QS_MONTH=2
 QS_DAY=3
 QS_YEAR=4
+QS_HOUR=5
 
 def query(uid=-1, min_time=None, max_time=None, sum=QS_NONE):
     '''
@@ -82,6 +83,7 @@ def query(uid=-1, min_time=None, max_time=None, sum=QS_NONE):
     q_where = (' WHERE '+' AND '.join(cond)) if len(cond) else ''
     if sum:
         sumfunc = "time"                        if sum == QS_ALL    else \
+                  "strftime('%Y-%m-%d %H',time)" if sum == QS_HOUR  else \
                   "strftime('%Y', time)"        if sum == QS_YEAR   else \
                   "strftime('%Y-%m', time)"     if sum == QS_MONTH  else \
                   "date(time)"                  if sum == QS_DAY    else \

@@ -157,9 +157,30 @@
                         Statistic 
                         <label> from <input name="from" type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(ever)"></label>
                         <label> to   <input name="to"   type="text" data-uk-datepicker="{format:'YYYY-MM-DD 00:00:00'}" placeholder="(now)"></label>
+                        <label> grouped by <select name="group">
+                            <option value="5">hour</option>
+                            <option value="3" selected>day</option>
+                            <option value="2">month</option>
+                        </select> </label>
                         <button type="submit" class="uk-button">Query</button>
                     </P>
+                    <p>Scale <input v-model="app.stat_scale" type="range" min="1" max="200" step="1"></p>
+                    <p>Filter <input v-model="app.stat_filter" type="text" placeholder="user1|user2|user3"> (RegExp is Enabled)</p>
                 </form>
+                <div class="fk-chart">
+                    <div v-for="di in app.stat" 
+                        :data-title="di.title" 
+                        class="fk-chart-row" 
+                        :data-suffix="humanFileSize(sumAmount(di.data,app.stat_filter))"
+                        >
+                        <div v-for="dii in di.data"
+                            v-bind:class="{ 'hidden' : app.stat_filter && !dii.title.match(app.stat_filter) }"
+                            data-uk-tooltip :title="dii.title+' : '+humanFileSize(dii.amount)" 
+                            class="fk-chart-ingredient" 
+                            :style="'width:'+(dii.amount/Math.pow(10,app.stat_scale/10))+'px'"
+                        >{{ dii.title }}</div>
+                    </div>
+                </div>
             </li>
             <li>
                 <h2>System</h2>

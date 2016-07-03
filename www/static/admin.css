@@ -1,3 +1,59 @@
+.fk-chart {
+    margin: 1em 0;
+}
+
+.fk-chart-row {
+    display: flex;
+    flex-direction: row;
+    padding: 2px;
+}
+
+.fk-chart-row:nth-child(even) {
+    background-color: #FAFAFA;
+}
+
+.fk-chart-row:before {
+    content: attr(data-title);
+    display: block;
+    width: 120px;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.fk-chart-row:after {
+    content: attr(data-suffix);
+    display: block;
+    white-space: nowrap;
+    color: #666;
+    padding: 0 4px;
+    font-size: .87em;
+}
+
+.fk-chart-row:before,
+.fk-chart-ingredient {
+    display: block;
+    height: 2em;
+    line-height: 2em;
+    padding: 0 .4em;
+    font-size: .87em;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: .1s ease;
+}
+
+.fk-chart-ingredient.hidden {
+    width: 0px !important;
+    padding: 0 0em;
+}
+
+.fk-chart-ingredient:nth-child(5n+0) { background-color: #64b5f6 }
+.fk-chart-ingredient:nth-child(5n+1) { background-color: #aed581 }
+.fk-chart-ingredient:nth-child(5n+2) { background-color: #ffd54f }
+.fk-chart-ingredient:nth-child(5n+3) { background-color: #f48fb1 }
+.fk-chart-ingredient:nth-child(5n+4) { background-color: #dce775 }
+
+.fk-chart-ingredient { background-image: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0)) }
+
 .table-input {
     border: 1px solid transparent;
     border-radius: 2px;
