@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from web.models import ProxyAccount
 
+from core.util import encodeURIComponent
 import pyqrcode, io, json
 
 def qr_view(request):
@@ -64,7 +65,7 @@ def account_edit_view(request, service):
             account_config.update(form.cleaned_data)
             account.config = json.dumps(account_config)
             account.save()
-            return redirect('/account/')
+            return redirect('/account/#' + encodeURIComponent(service))
     else:
         form = UserForm(initial=account_config)
             

@@ -84,10 +84,10 @@ button:focus, input[type=submit]:focus
     overflow: hidden;
     padding: 0 1em;
     padding-left: 150px;
+    margin-bottom: 2em;
     position: relative;
     min-height: 2em;
 }
-.accounts .account:nth-child(odd)   {    background: #F3F3F3;}
 .accounts .account.disabled         {    background: #FDD;}
 
 .accounts .account .float { float: right; }

@@ -3,16 +3,18 @@
 
 from __future__ import print_function
 
-import importlib
 import signal
 import sys
+import os
+import json
 
 import config
 from core import daemon, util
+from web.wsgi import application as web_application
 from service import getService
 
 opts = {
-    'daemon'  : 'restart',
+    # 'daemon'  : 'restart',
     'pid-file': '/var/run/ssland.pid',
     'log-file': '/var/log/ssland.log',
 }
@@ -38,16 +40,25 @@ def parse_opts():
             opts['daemon'] = value
 
 def init_all_service():
-    for (name, config) in config.MODULES.items():
+    from web.models import ProxyAccount
+    accounts = {}  # "service": [account1, account2]
+    for ac in ProxyAccount.objects.filter(enabled=True).all():
+        name = ac.service
+        if not name in accounts: accounts[name] = []
+        accounts[name].append(json.loads(ac.config))
+
+    for (name, service_config) in config.MODULES.items():
+        if not name in accounts: accounts[name] = []
         service = getService(name)
-        service.init(config)
-        service.start()
+        service.init(service_config)
+        service.start(accounts[name])
 
 def kill_all_service():
     for name in config.MODULES:
         getService(name).stop()
 
 if __name__ == "__main__":
+
     parse_opts()
     daemon.daemon_exec(opts)
     
@@ -55,3 +66,9 @@ if __name__ == "__main__":
     signal.signal(getattr(signal, 'SIGQUIT', signal.SIGTERM), kill_all_service)
 
     # main loop
+    try:
+        from wsgiref.simple_server import make_server
+        httpd = make_server('', 8000, web_application)
+        httpd.serve_forever()
+    except:
+        kill_all_service()
