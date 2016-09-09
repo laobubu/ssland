@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="accounts">
+    <h2>Account Edit</h2>
+    <div class="account{% if not account.enabled %} disabled{% endif %}">
+        <h3>{{ account.service }}</h3>
+        <form method="POST" action=".">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p>
+                <button type="submit">Save</button>
+                <a href="/account/">Cancel</a>
+            </p>
+        </form>
+    </div>
+</section>
+
+{% endblock %}

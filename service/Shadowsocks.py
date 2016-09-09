@@ -5,27 +5,52 @@
 #
 
 from __future__ import absolute_import
+import base64
+from core.util import get_stdout, encodeURIComponent
 
-from service.Base import ServiceBase
-from core.util import get_stdout
+config = {
+    "executable": "ssserver",
+    "config-file": "/etc/shadowsocks.json",
+    "manager-address": "/var/run/shadowsocks-manager.sock",
+    "method": "aes-256-cfb",
+    "server": "127.0.0.1"
+}
 
-class Shadowsocks(ServiceBase):
-    config = {
-        "executable": "ssserver",
-        "config-file": "/etc/shadowsocks.json",
-        "manager-address": "/var/run/shadowsocks-manager.sock",
-    }
-    executable = ()
+executable = ('ssserver', )
 
-    def __init__(self, config):
-        self.config = config
-        self.executable = tuple(self.config["executable"].split(' ')) + (
-            '-c', self.config["config-file"], 
-            '--manager-address', self.config['manager-address']
-        )
-
-    def start(self):
-        get_stdout(self.executable + ('-d', 'start'))
+def init(_config):
+    global executable
+    config.update(_config)
+    executable = tuple(config["executable"].split(' ')) + (
+        '-c', config["config-file"], 
+        '--manager-address', config['manager-address']
+    )
     
-    def stop(self):
-        get_stdout(self.executable + ('-d', 'stop'))
+def html(account_config):
+    ssurl = '%s:%s@%s:%d' % (
+        config['method'],
+        account_config['sskey'],
+        config['server'],
+        account_config['port']
+    )
+    imgurl = '/qr.svg?data=%s' % encodeURIComponent('ss://' + base64.b64encode(ssurl))
+    return '\n'.join([
+        '<a href="%s" target="_blank"><img src="%s" class="float"></a>' % (imgurl,imgurl),
+        '<table class="strip">',
+        '  <tr><th>server</th>      <td>%s</td></tr>' % config['server']          ,
+        '  <tr><th>server_port</th> <td>%d</td></tr>' % account_config['port']    ,
+        '  <tr><th>password</th>    <td>%s</td></tr>' % account_config['sskey']   ,
+        '  <tr><th>method</th>      <td>%s</td></tr>' % config['method']          , 
+        '</table>',
+    ])
+
+
+from django import forms
+class UserForm(forms.Form):
+    sskey = forms.CharField(label='Password', max_length=100)
+
+def start():
+    get_stdout(executable + ('-d', 'restart'))
+
+def stop():
+    get_stdout(executable + ('-d', 'stop'))

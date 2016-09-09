@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form method="POST" action=".">
+    <p><label>Username: <input type="text"     name="username" value="{{ username | escape }}"></label></p>
+    <p><label>Password: <input type="password" name="password"></label></p>
+    <p><input type="submit" value="Login"></p>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ nexturi | escape }}">
+</form>
+
+{% endblock %}

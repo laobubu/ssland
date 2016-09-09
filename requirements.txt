@@ -1,3 +1,2 @@
-bottle
-peewee
-pyqrcode
+Django==1.10.1
+PyQRCode==1.2

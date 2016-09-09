@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>
+{% if is_authenticated %}
+<a href="/account" class="button">Account</a>
+{% else %}
+<a href="/login" class="button">Login</a>
+{% endif %}
+</p>
+
+{% endblock %}

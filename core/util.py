@@ -7,6 +7,10 @@
 
 import logging
 
+import urllib
+def encodeURIComponent(str):
+    return urllib.quote(str, safe='~()*!.\'')
+
 def get_stdout(*args):
     '''
     Execute an application, returning (stdout, exitcode)

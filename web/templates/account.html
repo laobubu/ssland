@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="accounts">
+    <h2>Accounts</h2>
+{% for account in accounts %}
+    <div class="account{% if not account.enabled %} disabled{% endif %}">
+        <h3>{{ account.service }}</h3>
+        {{ account.html | safe }}
+        <p><a href="/account/edit/{{ account.service }}">Edit</a></p>
+    </div>
+{% endfor %}
+</section>
+
+{% endblock %}

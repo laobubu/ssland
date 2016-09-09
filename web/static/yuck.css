@@ -1,0 +1,139 @@
+@charset "utf-8";
+
+html {
+    background-color: #eeeeee;
+    color: #303841;
+}
+
+* {
+    font-family: "DejaVu Sans Mono", Monaco, Consolas, "Courier New", Courier, monospace;
+}
+
+pre {
+    display: block;
+    background-color: #FFF;
+    padding: 1ch;
+}
+
+h1,h2,h3,h4,h5 {
+    font-weight: normal;
+}
+
+a {
+    color: #26a;
+    text-decoration: none;
+}
+
+.wrapper {
+    overflow: hidden;
+    max-width: 960px;
+    margin: auto;
+}
+
+.wrapper > header {
+    padding-bottom: .5em;
+    border-bottom: 1px solid #000;
+    display: flex;
+}
+
+.wrapper > header .right {
+    flex-grow: 1;
+    text-align: right;
+}
+
+input[type=text], input[type=password] {
+    border: none;
+    outline: 1px solid #303841;
+    box-shadow: 1px solid #303841;
+    vertical-align: middle;
+    padding: 5px 10px;
+}
+
+.button, button, input[type=submit] {
+    border: 0;
+    background-color: #303841;
+    padding: 5px 10px;
+    color: #eeeeee;
+    cursor: pointer;
+    vertical-align: middle;
+    display: inline-block;
+    font-size: 0.87em;
+}
+
+.button:hover,.button:focus,
+button:hover, input[type=submit]:hover, 
+button:focus, input[type=submit]:focus 
+{
+    background-color: #3a4750;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+
+/* accounts */
+
+.accounts:after,
+.accounts .account:after {
+    display: block;
+    content: ' ';
+    clear: both;
+}
+
+.accounts .account {
+    background: #FFF;
+    overflow: hidden;
+    padding: 0 1em;
+    padding-left: 150px;
+    position: relative;
+    min-height: 2em;
+}
+.accounts .account:nth-child(odd)   {    background: #F3F3F3;}
+.accounts .account.disabled         {    background: #FDD;}
+
+.accounts .account .float { float: right; }
+.accounts .account h3 { 
+    position: absolute;
+    margin: 0;
+    left: 0px;
+    width: 150px;
+    padding: 1em;
+    top: 0px;
+    box-sizing: border-box;
+    display: block;
+    text-align: center;
+    font-size: 1em;
+    color: #666;
+}
+
+@media screen and (max-width: 800px) {
+    .accounts .account .float{
+        float: none;
+        display: block;
+        margin: .5em auto;
+    }
+    .accounts .account {
+        padding-left: 1em;
+    }
+    .accounts .account h3 {
+        position: static;
+    }
+}
+
+/* pre */
+.gray { color: #999; }
+.major {color: #000; }
+
+/* strip table */
+table.strip {
+    margin: 1em 0;
+    border-collapse: collapse;
+    max-width: 90%;
+    display: block;
+}
+table.strip td, table.strip th {
+    text-align: left;
+    padding: .5em 1em;
+}
+table.strip tr:nth-child(odd) {
+    background: rgba(0, 0, 0, 0.05);
+}
