@@ -9,6 +9,7 @@ import base64
 import socket
 import json
 import logging
+import time
 from core.util import get_stdout, encodeURIComponent
 
 config = {
@@ -18,6 +19,14 @@ config = {
     "method": "aes-256-cfb",
     "server": "127.0.0.1"
 }
+
+'''
+account_config format:
+{
+    "port": 1234,
+    "sskey": "password",
+}
+'''
 
 _executable = ('ssserver', )
 _control_socket = None
@@ -56,24 +65,52 @@ def init(_config):
         exit(1)
 
 def start(accounts):
-    print get_stdout(_executable + ('-d', 'restart'))
+    stop()
+    
+    conf_filename = config["config-file"]
+    try:    conf = json.load(open(conf_filename, 'r'))
+    except: conf = {"server": "0.0.0.0", "timeout": 300, "method": "aes-256-cfb"}
+    
+    pps = conf['port_password'] if 'port_password' in conf else {}
+    if "server_port" in conf and "password" in conf:
+        logging.warn("removing server_port and password fields in %s", conf_filename)
+        pps[conf["server_port"]] = conf["password"]
+        del conf["server_port"]
+        del conf["password"]
+
+    for account in accounts:
+        pps[account['port']] = account['sskey']
+    
+    # edge case: no active account
+    # if so, create one account and remove it after shadowsocks starts 
+    temp_port = 0
+    if len(pps) == 0 :
+        logging.warn('No active account in %s', conf_filename)
+        temp_port = 54301
+        pps[temp_port] = "ssland-temp-account"
+    
+    conf['port_password'] = pps
+    json.dump(conf, open(conf_filename, 'w'))
+
+    get_stdout(_executable + ('-d', 'restart'))
+
+    if temp_port:
+        logging.warn('Removing temp account')
+        time.sleep(3)
+        remove({'port': temp_port})
 
 def stop():
-    print get_stdout(_executable + ('-d', 'stop'))
+    get_stdout(_executable + ('-d', 'stop'))
 
 
 
 ## Account Control Function
 
 def add(ac):
-    pl = {"server_port": ac['port'], "password": ac['sskey']}
-    _control_socket.send(('add: '+json.dumps(pl)).encode())
-    _control_socket.recv(1506)
+    _manager_command('add', { "server_port": ac['port'], "password": ac['sskey'] })
 
 def remove(ac):
-    pl = {"server_port": ac['port']}
-    _control_socket.send(('remove: '+json.dumps(pl)).encode())
-    _control_socket.recv(1506)
+    _manager_command('remove', { "server_port": ac['port'] })
 
 def update(ac):
     remove(ac)
@@ -105,3 +142,10 @@ def html(account_config):
 from django import forms
 class UserForm(forms.Form):
     sskey = forms.CharField(label='Password', max_length=100)
+
+
+# Other Shadowsocks specified functions
+def _manager_command(cmd, payload=None):
+    pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
+    _control_socket.send(pl.encode())
+    _control_socket.recv(1506)
