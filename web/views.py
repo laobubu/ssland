@@ -56,18 +56,16 @@ def account_view(request):
 def account_edit_view(request, service):
     user = request.user
     account = ProxyAccount.objects.filter(user=user,service=service) [0]
-    account_config = json.loads(account.config)
     UserForm = account.form
 
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
-            account_config.update(form.cleaned_data)
-            account.config = json.dumps(account_config)
+            account.config.update(form.cleaned_data)
             account.save()
             return redirect('/account/#' + encodeURIComponent(service))
     else:
-        form = UserForm(initial=account_config)
+        form = UserForm(initial=account.config)
             
     return render(request, 'account.edit.html', {
         'title': 'Edit Account', 

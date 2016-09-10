@@ -45,7 +45,7 @@ def init_all_service():
     for ac in ProxyAccount.objects.filter(enabled=True).all():
         name = ac.service
         if not name in accounts: accounts[name] = []
-        accounts[name].append(json.loads(ac.config))
+        accounts[name].append(ac.config)
 
     for (name, service_config) in config.MODULES.items():
         if not name in accounts: accounts[name] = []
