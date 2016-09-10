@@ -58,9 +58,6 @@ def start(accounts, event_loop=None):
         pps[conf["server_port"]] = conf["password"]
         del conf["server_port"]
         del conf["password"]
-
-    for account in accounts:
-        pps[account['port']] = account['sskey']
     
     # edge case: no active account
     # if so, create one account and remove it after shadowsocks starts 
@@ -82,6 +79,10 @@ def start(accounts, event_loop=None):
     time.sleep(3)
     _stat = ShadowsocksStat(config['manager-address'], event_loop)
     _stat.add_to_loop()
+
+    # active active accounts
+    for account in accounts:
+        add(account)
 
     # fixing the edge case
     if temp_port:
