@@ -1,9 +1,11 @@
-A service module must at least have these stuff:
+A service module provides proxy service. 
+
+It must implement these stuff...
 
 ## Basic Control Function
 
  - `init(config)`
- - `start(accounts)`
+ - `start(accounts, event_loop)`
  - `stop()`
 
  content of `config` for initialization function comes from `/config.py` file.
@@ -14,14 +16,23 @@ A service module must at least have these stuff:
  2. fetch all active accounts from the database,
  3. start the services for the active accounts.
 
+ when ssland exits, it will
+ 
+ 1. stop all services.
+
+### Details on `start` function
+
  `accounts` is an array of active `account_config` (see below).
 
  if there is no active account, ssland will provide an empty array.
  however, some proxy servers may fail to start. be careful to handle this.
-
- when ssland exits, it will
  
- 1. stop all services.
+ `event_loop` is the SSLand main event loop, an instance of [shadowsocks eventloop].
+
+ you can ignore this param, or use it to do statistics and periodic tasks.
+ for example, Shadowsocks may report the traffic statistics per 10 seconds.
+
+ [shadowsocks eventloop]: https://github.com/shadowsocks/shadowsocks/blob/master/shadowsocks/eventloop.py
 
 ## Account Control Function
  

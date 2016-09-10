@@ -41,9 +41,10 @@ def init(_config):
         '--manager-address', config['manager-address']
     )
 
-def start(accounts):
+def start(accounts, event_loop=None):
     stop()
     
+    # Read and update Shadowsocks conf file
     conf_filename = config["config-file"]
     try:    conf = json.load(open(conf_filename, 'r'))
     except: conf = {"server": "0.0.0.0", "timeout": 300, "method": "aes-256-cfb"}
@@ -69,12 +70,18 @@ def start(accounts):
     conf['port_password'] = pps
     json.dump(conf, open(conf_filename, 'w'))
 
+    # start proxy server
     try: os.unlink(config['manager-address'])
     except: pass
-
     get_stdout(_executable + ('-d', 'restart'))
-    time.sleep(3)
 
+    # add to event_loop
+    time.sleep(3)
+    if event_loop:
+        stat = ShadowsocksStat(config['manager-address'], event_loop)
+        stat.add_to_loop()
+
+    # fixing the edge case
     if temp_port:
         logging.warn('Removing temp account')
         remove({'port': temp_port})
@@ -126,6 +133,7 @@ class UserForm(forms.Form):
 
 # Other Shadowsocks specified functions
 
+# Shadowsocks Control socket
 class ShadowsocksCtx(socket.socket):
     local_sock_file = None
     addr_remote = None
@@ -183,6 +191,30 @@ class ShadowsocksCtx(socket.socket):
         self.send(pl.encode())
         self.recv(1506)
 
+# Functions
 def _manager_command(cmd, payload=None):
     with ShadowsocksCtx(config['manager-address']) as sc:
         sc.command(cmd, payload)
+
+# Shadowsocks traffic statistic
+from shadowsocks import eventloop, common
+
+class ShadowsocksStat:
+    def __init__(self, manager_address, loop):
+        self.loop = loop
+        self.ctx = ShadowsocksCtx(manager_address)
+        self.manager_address = manager_address
+    
+    def add_to_loop(self):
+        self.ctx.connect()
+        self.ctx.command('ping')
+        self.loop.add(self.ctx, eventloop.POLL_IN, self)
+    
+    def handle_event(self, sock, fd, event):
+        if sock == self.ctx and event == eventloop.POLL_IN:
+            data = self.ctx.recv(4096)
+            data = common.to_str(data)
+            data = data.split('stat:')[1]
+            stats = json.loads(data)
+            print('got stat!!!!')
+            print(data)
