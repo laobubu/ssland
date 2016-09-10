@@ -10,6 +10,7 @@ import socket
 import json
 import logging
 import time
+import os
 from core.util import get_stdout, encodeURIComponent
 
 config = {
@@ -40,29 +41,6 @@ def init(_config):
         '-c', config["config-file"], 
         '--manager-address', config['manager-address']
     )
-    try:
-        manager_address = config['manager-address']
-        if ':' in manager_address:
-            addr = manager_address.rsplit(':', 1)
-            addr = addr[0], int(addr[1])
-            addr_local = ('', 0)
-            addrs = socket.getaddrinfo(addr[0], addr[1])
-            if addrs:
-                family = addrs[0][0]
-            else:
-                logging.error('invalid address: %s', manager_address)
-                exit(1)
-        else:
-            addr = manager_address
-            addr_local = '/tmp/ssland.sock'
-            family = socket.AF_UNIX
-        _control_socket = socket.socket(family, socket.SOCK_DGRAM)
-        _control_socket.bind(addr_local)
-        _control_socket.connect(addr)
-    except (OSError, IOError) as e:
-        logging.error(e)
-        logging.error('can not bind to manager address')
-        exit(1)
 
 def start(accounts):
     stop()
@@ -93,10 +71,12 @@ def start(accounts):
     json.dump(conf, open(conf_filename, 'w'))
 
     get_stdout(_executable + ('-d', 'restart'))
+    time.sleep(3)
+
+    _manager_connect()
 
     if temp_port:
         logging.warn('Removing temp account')
-        time.sleep(3)
         remove({'port': temp_port})
 
 def stop():
@@ -145,6 +125,36 @@ class UserForm(forms.Form):
 
 
 # Other Shadowsocks specified functions
+
+def _manager_connect():
+    try:
+        manager_address = config['manager-address']
+        if ':' in manager_address:
+            addr = manager_address.rsplit(':', 1)
+            addr = addr[0], int(addr[1])
+            addr_local = ('', 0)
+            addrs = socket.getaddrinfo(addr[0], addr[1])
+            if addrs:
+                family = addrs[0][0]
+            else:
+                logging.error('invalid address: %s', manager_address)
+                exit(1)
+        else:
+            addr = manager_address
+            addr_local = '/var/run/ssland.sock'
+            family = socket.AF_UNIX
+            try:
+                os.unlink(addr_local)
+            except:
+                pass
+        _control_socket = socket.socket(family, socket.SOCK_DGRAM)
+        _control_socket.bind(addr_local)
+        _control_socket.connect(addr)
+    except (OSError, IOError) as e:
+        logging.error(e)
+        logging.error('can not connect to manager')
+        exit(1)
+
 def _manager_command(cmd, payload=None):
     pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
     _control_socket.send(pl.encode())
