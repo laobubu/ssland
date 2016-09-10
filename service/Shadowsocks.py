@@ -30,12 +30,11 @@ account_config format:
 '''
 
 _executable = ('ssserver', )
-_control_socket = None
 
 ## Basic Control Function
 
 def init(_config):
-    global _executable, _control_socket
+    global _executable
     config.update(_config)
     _executable = tuple(config["executable"].split(' ')) + (
         '-c', config["config-file"], 
@@ -75,8 +74,6 @@ def start(accounts):
 
     get_stdout(_executable + ('-d', 'restart'))
     time.sleep(3)
-
-    _manager_connect()
 
     if temp_port:
         logging.warn('Removing temp account')
@@ -129,36 +126,63 @@ class UserForm(forms.Form):
 
 # Other Shadowsocks specified functions
 
-def _manager_connect():
-    try:
-        manager_address = config['manager-address']
-        if ':' in manager_address:
-            addr = manager_address.rsplit(':', 1)
-            addr = addr[0], int(addr[1])
-            addr_local = ('', 0)
-            addrs = socket.getaddrinfo(addr[0], addr[1])
-            if addrs:
-                family = addrs[0][0]
+class ShadowsocksCtx(socket.socket):
+    local_sock_file = None
+    addr_remote = None
+    addr_local = None
+
+    def __init__(self, manager_address):
+        try:
+            # manager_address = config['manager-address']
+            if ':' in manager_address:
+                addr = manager_address.rsplit(':', 1)
+                addr = addr[0], int(addr[1])
+                addr_local = ('', 0)
+                addrs = socket.getaddrinfo(addr[0], addr[1])
+                if addrs:
+                    family = addrs[0][0]
+                else:
+                    logging.error('invalid address: %s', manager_address)
+                    exit(1)
             else:
-                logging.error('invalid address: %s', manager_address)
-                exit(1)
-        else:
-            addr = manager_address
-            addr_local = '/var/run/ssland.sock'
-            family = socket.AF_UNIX
-            try:
-                os.unlink(addr_local)
-            except:
-                pass
-        _control_socket = socket.socket(family, socket.SOCK_DGRAM)
-        _control_socket.bind(addr_local)
-        _control_socket.connect(addr)
-    except (OSError, IOError) as e:
-        logging.error(e)
-        logging.error('can not connect to manager')
-        exit(1)
+                import uuid
+                self.local_sock_file = '/var/run/ssland-%s.sock'%uuid.uuid4()
+                addr = manager_address
+                addr_local = self.local_sock_file
+                family = socket.AF_UNIX
+            
+            self.addr_local = addr_local
+            self.addr_remote = addr
+
+            socket.socket.__init__(self, family, socket.SOCK_DGRAM)
+        except (OSError, IOError) as e:
+            logging.error(e)
+            logging.error('can not connect to manager')
+        
+    def __enter__(self):
+        self.connect()
+        return self
+    
+    def __exit__(self, type, value, traceback):
+        self.close()
+    
+    def connect(self):
+        try:    os.unlink(self.local_sock_file)
+        except: pass
+        self.bind(self.addr_local)
+        socket.socket.connect(self, self.addr_remote)
+
+    def close(self):
+        socket.socket.close(self)
+        try:    os.unlink(self.local_sock_file)
+        except: pass
+
+    def command(self, cmd, payload=None):
+        '''Send shadowsocks command'''
+        pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
+        self.send(pl.encode())
+        self.recv(1506)
 
 def _manager_command(cmd, payload=None):
-    pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
-    _control_socket.send(pl.encode())
-    _control_socket.recv(1506)
+    with ShadowsocksCtx(config['manager-address']) as sc:
+        sc.command(cmd, payload)
