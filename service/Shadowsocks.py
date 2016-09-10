@@ -30,6 +30,7 @@ account_config format:
 '''
 
 _executable = ('ssserver', )
+_stat = None 
 
 ## Basic Control Function
 
@@ -42,6 +43,8 @@ def init(_config):
     )
 
 def start(accounts, event_loop=None):
+    global _stat
+
     stop()
     
     # Read and update Shadowsocks conf file
@@ -77,9 +80,8 @@ def start(accounts, event_loop=None):
 
     # add to event_loop
     time.sleep(3)
-    if event_loop:
-        stat = ShadowsocksStat(config['manager-address'], event_loop)
-        stat.add_to_loop()
+    _stat = ShadowsocksStat(config['manager-address'], event_loop)
+    _stat.add_to_loop()
 
     # fixing the edge case
     if temp_port:
@@ -189,12 +191,11 @@ class ShadowsocksCtx(socket.socket):
         '''Send shadowsocks command'''
         pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
         self.send(pl.encode())
-        self.recv(1506)
+        # self.recv(1506)
 
 # Functions
 def _manager_command(cmd, payload=None):
-    with ShadowsocksCtx(config['manager-address']) as sc:
-        sc.command(cmd, payload)
+    _stat.ctx.command(cmd, payload)
 
 # Shadowsocks traffic statistic
 from shadowsocks import eventloop, common
@@ -214,7 +215,8 @@ class ShadowsocksStat:
         if sock == self.ctx and event == eventloop.POLL_IN:
             data = self.ctx.recv(4096)
             data = common.to_str(data)
-            data = data.split('stat:')[1]
-            stats = json.loads(data)
-            print('got stat!!!!')
-            print(data)
+            if data.startswith('stat:'):
+                data = data.split('stat:')[1]
+                stat_data = json.loads(data)
+                print('got stat!!!!')
+                print(data)
