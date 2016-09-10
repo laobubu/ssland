@@ -70,6 +70,9 @@ def start(accounts):
     conf['port_password'] = pps
     json.dump(conf, open(conf_filename, 'w'))
 
+    try: os.unlink(config['manager-address'])
+    except: pass
+
     get_stdout(_executable + ('-d', 'restart'))
     time.sleep(3)
 

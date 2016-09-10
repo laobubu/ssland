@@ -64,6 +64,22 @@ if __name__ == "__main__":
     atexit.register(kill_all_service)
 
     # main loop
+    # this is slow. consider uWSGI or other backend
+
+    from web.urls import urlpatterns
+    from django.conf.urls import url
+    def static_view(request, path):
+        from django.http import HttpResponse
+        from django.contrib.staticfiles.finders import find
+        import mimetypes
+        fp = find(path)
+        if fp:
+            return HttpResponse(
+                file(fp, 'rb').read(),
+                content_type = mimetypes.guess_type(path, strict=False)[0]
+            )
+    urlpatterns.append(url(r'^static/(?P<path>[^\?]+)$', static_view))
+    
     from wsgiref.simple_server import make_server
     httpd = make_server('', 8000, web_application)
     httpd.serve_forever()
