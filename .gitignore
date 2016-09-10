@@ -6,3 +6,4 @@ user/*
 .vscode/
 typings/
 db.sqlite3
+web/migrations/
