@@ -17,14 +17,18 @@ class ProxyAccount(models.Model):
     expire_when = models.DateTimeField(default=datetime.datetime(2000,1,1), blank=True)
 
     def save(self, *args, **kw):
-        orig = ProxyAccount.objects.get(pk=self.pk)
-        serv = getService(self.service)
-        if not orig.enabled and self.enabled: # add
-            serv.add(self.config)
-        if orig.enabled and not self.enabled: # remove
-            serv.remove(self.config)
-        if orig.enabled and self.enabled: # update
-            serv.update(self.config)
+        try:
+            orig = ProxyAccount.objects.get(pk=self.pk)
+            serv = getService(self.service)
+            if not orig.enabled and self.enabled: # add
+                serv.add(self.config)
+            if orig.enabled and not self.enabled: # remove
+                serv.remove(self.config)
+            if orig.enabled and self.enabled: # update
+                serv.update(self.config)
+        except ProxyAccount.DoesNotExist as e:
+            pass
+        self.config['id'] = self.pk
         super(ProxyAccount, self).save(*args, **kw)
 
     @property

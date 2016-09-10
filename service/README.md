@@ -40,12 +40,12 @@ It must implement these stuff...
  - `remove(account_config)`
  - `update(account_config)`     - update one active account.
  
- the account_config comes from database records.
+### account_config
 
- while designing a service, do not forget setting up an user-readonly field 
- in the account_config, which is the key to implement the `update` function.
+ `account_config` is a dict object, stroaged in the database.
+ you may structure it as you like, except these reserved fields:
 
- for example, *port* for Shadowsocks, *username* for L2TP/IPSec
+ - `id` - the primary key of this account.
 
 ## Web-panel Related
 
