@@ -3,10 +3,8 @@
 
 from __future__ import print_function
 
-import signal
 import sys
-import os
-import json
+import atexit
 
 import config
 from core import daemon, util
@@ -63,12 +61,9 @@ if __name__ == "__main__":
     daemon.daemon_exec(opts)
     
     init_all_service()
-    signal.signal(getattr(signal, 'SIGQUIT', signal.SIGTERM), kill_all_service)
+    atexit.register(kill_all_service)
 
     # main loop
-    try:
-        from wsgiref.simple_server import make_server
-        httpd = make_server('', 8000, web_application)
-        httpd.serve_forever()
-    except:
-        kill_all_service()
+    from wsgiref.simple_server import make_server
+    httpd = make_server('', 8000, web_application)
+    httpd.serve_forever()
