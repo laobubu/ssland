@@ -52,3 +52,13 @@ def to_str(s):
         if type(s) == bytes:
             return s.decode('utf-8')
     return s
+
+def html_strip_table(obj):
+    '''turn flat dict into a html table
+    '''
+    from cgi import escape
+    return  (
+        ['<table class="strip">'] + 
+        [('  <tr><th>%s</th><td>%s</td></tr>'%(k, escape(str(v)))) for (k,v) in obj.items()] + 
+        ['</table>']
+    )

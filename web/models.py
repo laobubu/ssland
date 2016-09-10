@@ -36,3 +36,12 @@ class ProxyAccount(models.Model):
     def form(self):
         cl = getService(self.service)
         return cl.UserForm
+
+class TrafficStat(models.Model):
+    account = models.ForeignKey(ProxyAccount)
+    time = models.DateTimeField(auto_now_add=True, blank=True)
+    amount = models.IntegerField()
+
+class UsageQuota(models.Model):
+    class Meta:
+        abstract = True

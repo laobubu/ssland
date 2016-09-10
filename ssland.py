@@ -57,37 +57,6 @@ def kill_all_service():
     for name in config.MODULES:
         getService(name).stop()
 
-class SlowHTTPServer():
-    '''SSLand built-in but really slow WSGI server
-
-    Works with shadowsocks.eventloop
-    `server` is the WSGIServer instance.
-    '''
-
-    def __init__(self, wsgi_app):
-        from web.urls import urlpatterns
-        from wsgiref.simple_server import make_server
-        from django.conf.urls import url
-        def static_view(request, path):
-            from django.http import HttpResponse
-            from django.contrib.staticfiles.finders import find
-            import mimetypes
-            fp = find(path)
-            if fp:
-                return HttpResponse(
-                    file(fp, 'rb').read(),
-                    content_type = mimetypes.guess_type(path, strict=False)[0]
-                )
-        urlpatterns.append(url(r'^static/(?P<path>[^\?]+)$', static_view))
-        self.server = make_server('', 8000, wsgi_app)
-    
-    def add_to_loop(self, loop):
-        loop.add(self.server, eventloop.POLL_IN, self)
-    
-    def handle_event(self, sock, fd, event):
-        if sock == self.server and event == eventloop.POLL_IN:
-            self.server.handle_request()
-
 if __name__ == "__main__":
 
     parse_opts()
@@ -100,6 +69,7 @@ if __name__ == "__main__":
 
     # WSGI App
     # this is slow. consider uWSGI or other backend
+    from core.httpserver import SlowHTTPServer
     server = SlowHTTPServer(wsgi_app=web_application)
     server.add_to_loop(main_loop)
     

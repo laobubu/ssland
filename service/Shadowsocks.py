@@ -4,14 +4,16 @@
 #  Shadowsocks service
 #
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import base64
-import socket
 import json
 import logging
 import time
 import os
+from collections import OrderedDict
 from core.util import get_stdout, encodeURIComponent
+from core.ssutil import ShadowsocksStat
+from web.models import ProxyAccount, TrafficStat
 
 config = {
     "executable": "ssserver",
@@ -78,6 +80,7 @@ def start(accounts, event_loop=None):
     # add to event_loop
     time.sleep(3)
     _stat = ShadowsocksStat(config['manager-address'], event_loop)
+    _stat.set_callback(_stat_updated)
     _stat.add_to_loop()
 
     # active active accounts
@@ -111,6 +114,8 @@ def update(ac):
 ## Web-panel Related
 
 def html(account_config):
+    from core.util import html_strip_table
+    
     ssurl = '%s:%s@%s:%d' % (
         config['method'],
         account_config['sskey'],
@@ -118,106 +123,28 @@ def html(account_config):
         account_config['port']
     )
     imgurl = '/qr.svg?data=%s' % encodeURIComponent('ss://' + base64.b64encode(ssurl))
-    return '\n'.join([
-        '<a href="%s" target="_blank"><img src="%s" class="float"></a>' % (imgurl,imgurl),
-        '<table class="strip">',
-        '  <tr><th>server</th>      <td>%s</td></tr>' % config['server']          ,
-        '  <tr><th>server_port</th> <td>%d</td></tr>' % account_config['port']    ,
-        '  <tr><th>password</th>    <td>%s</td></tr>' % account_config['sskey']   ,
-        '  <tr><th>method</th>      <td>%s</td></tr>' % config['method']          , 
-        '</table>',
-    ])
+    
+    table = OrderedDict()
+    table['server']         = config['server']
+    table['server_port']    = account_config['port']
+    table['password']       = account_config['sskey']
+    table['method']         = config['method']
+
+    return '\n'.join(
+        ['<a href="%s" target="_blank"><img src="%s" class="float"></a>' % (imgurl, imgurl)] + 
+        html_strip_table(table)
+    )
 
 
 from django import forms
 class UserForm(forms.Form):
     sskey = forms.CharField(label='Password', max_length=100)
 
-
 # Other Shadowsocks specified functions
 
-# Shadowsocks Control socket
-class ShadowsocksCtx(socket.socket):
-    local_sock_file = None
-    addr_remote = None
-    addr_local = None
-
-    def __init__(self, manager_address):
-        try:
-            # manager_address = config['manager-address']
-            if ':' in manager_address:
-                addr = manager_address.rsplit(':', 1)
-                addr = addr[0], int(addr[1])
-                addr_local = ('', 0)
-                addrs = socket.getaddrinfo(addr[0], addr[1])
-                if addrs:
-                    family = addrs[0][0]
-                else:
-                    logging.error('invalid address: %s', manager_address)
-                    exit(1)
-            else:
-                import uuid
-                self.local_sock_file = '/var/run/ssland-%s.sock'%uuid.uuid4()
-                addr = manager_address
-                addr_local = self.local_sock_file
-                family = socket.AF_UNIX
-            
-            self.addr_local = addr_local
-            self.addr_remote = addr
-
-            socket.socket.__init__(self, family, socket.SOCK_DGRAM)
-        except (OSError, IOError) as e:
-            logging.error(e)
-            logging.error('can not connect to manager')
-        
-    def __enter__(self):
-        self.connect()
-        return self
-    
-    def __exit__(self, type, value, traceback):
-        self.close()
-    
-    def connect(self):
-        try:    os.unlink(self.local_sock_file)
-        except: pass
-        self.bind(self.addr_local)
-        socket.socket.connect(self, self.addr_remote)
-
-    def close(self):
-        socket.socket.close(self)
-        try:    os.unlink(self.local_sock_file)
-        except: pass
-
-    def command(self, cmd, payload=None):
-        '''Send shadowsocks command'''
-        pl = (cmd + ':' + json.dumps(payload)) if payload else cmd
-        self.send(pl.encode())
-        # self.recv(1506)
-
-# Functions
 def _manager_command(cmd, payload=None):
     _stat.ctx.command(cmd, payload)
 
-# Shadowsocks traffic statistic
-from shadowsocks import eventloop, common
-
-class ShadowsocksStat:
-    def __init__(self, manager_address, loop):
-        self.loop = loop
-        self.ctx = ShadowsocksCtx(manager_address)
-        self.manager_address = manager_address
-    
-    def add_to_loop(self):
-        self.ctx.connect()
-        self.ctx.command('ping')
-        self.loop.add(self.ctx, eventloop.POLL_IN, self)
-    
-    def handle_event(self, sock, fd, event):
-        if sock == self.ctx and event == eventloop.POLL_IN:
-            data = self.ctx.recv(4096)
-            data = common.to_str(data)
-            if data.startswith('stat:'):
-                data = data.split('stat:')[1]
-                stat_data = json.loads(data)
-                print('got stat!!!!')
-                print(data)
+def _stat_updated(stat_data):
+    print('got stat!!!!')
+    print(stat_data)
