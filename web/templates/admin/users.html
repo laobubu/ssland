@@ -1,0 +1,18 @@
+{% extends "../base.html" %}
+{% block content %}
+<section class="accounts compact">
+    <h2>{{ title }}</h2>
+
+    <p><a class="button" href="./add">Add User</a></p>
+
+    {% for u in users %}
+    <div class="account {% if not u.is_active %} disabled{% endif %}">
+        <h3 id="{{ u.username }}">{{ u.username }}</h3>
+        
+        <p>
+            <a class="flick" href="/admin/user/toggle/{{ u.pk }}/">Toggle</a>
+        </p>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

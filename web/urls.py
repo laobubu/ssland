@@ -21,7 +21,12 @@ urlpatterns = [
     url(r'^$', views.index_view),
     url(r'^login/$', views.login_view),
     url(r'^logout/$', views.logout_view),
-    url(r'^ttt/$', views.ttt_test),
+
+    url(r'^admin/account/edit/(?P<account_id>\d+)/$', views.views_admin.account_edit),
+    url(r'^admin/account/toggle/(?P<account_id>\d+)/$', views.views_admin.account_toggle),
+    url(r'^admin/user/$', views.views_admin.user_list),
+    url(r'^admin/user/toggle/(?P<uid>\d+)/$', views.views_admin.user_toggle),
+    url(r'^admin/user/add/$', views.views_admin.user_add),
     url(r'^admin/', admin.site.urls),
 
     url(r'^account/$', views.account_view),

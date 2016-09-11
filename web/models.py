@@ -16,18 +16,37 @@ class ProxyAccount(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     expire_when = models.DateTimeField(default=datetime.datetime(2000,1,1), blank=True)
 
+    @property
+    def is_active(self):
+        return self.enabled and self.user.is_active
+
+    def stop_service(self):
+        '''DANGEROUS: unconditionally stop service for this account'''
+        getService(self.service).remove(self.config)
+
+    def start_service(self):
+        '''DANGEROUS: unconditionally start service for this account'''
+        getService(self.service).add(self.config)
+
     def save(self, *args, **kw):
         try:
             orig = ProxyAccount.objects.get(pk=self.pk)
             serv = getService(self.service)
-            if not orig.enabled and self.enabled: # add
-                serv.add(self.config)
-            if orig.enabled and not self.enabled: # remove
-                serv.remove(self.config)
-            if orig.enabled and self.enabled: # update
-                serv.update(self.config)
+            
+            a_orig = orig.is_active
+            a_curr = self.is_active
+
+            if not a_orig and a_curr:   serv.add(self.config)       # add
+            if a_orig and not a_curr:   serv.remove(self.config)    # remove
+            if a_orig and a_curr:       serv.update(self.config)    # update
+                
         except ProxyAccount.DoesNotExist as e:
             pass
+        except Exception as e2:
+            from core.util import print_exception
+            import logging
+            print_exception(e2)
+            logging.error("Failed to update service for ProxyAccount %d", self.pk)
         self.config['id'] = self.pk
         super(ProxyAccount, self).save(*args, **kw)
 
@@ -40,6 +59,11 @@ class ProxyAccount(models.Model):
     def form(self):
         cl = getService(self.service)
         return cl.UserForm
+
+    @property
+    def adminForm(self):
+        cl = getService(self.service)
+        return cl.AdminForm
 
 class TrafficStat(models.Model):
     account = models.ForeignKey(ProxyAccount)

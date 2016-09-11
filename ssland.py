@@ -42,7 +42,7 @@ def parse_opts():
 def init_all_service():
     from web.models import ProxyAccount
     accounts = {}  # "service": [account1, account2]
-    for ac in ProxyAccount.objects.filter(enabled=True).all():
+    for ac in ProxyAccount.objects.filter(enabled=True, user__is_active=True).all():
         name = ac.service
         if not name in accounts: accounts[name] = []
         accounts[name].append(ac.config)

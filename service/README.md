@@ -39,6 +39,8 @@ It must implement these stuff...
  - `add(account_config)`
  - `remove(account_config)`
  - `update(account_config)`     - update one active account.
+
+ - `skeleton()` - return an account_config for a new account. 
  
 ### account_config
 
@@ -51,3 +53,10 @@ It must implement these stuff...
 
  - `def html(account_config)`           - generate visual information for web browsers. 
  - `class UserForm(django.forms.Form)`  - user configurable params
+ - `class AdminForm(django.forms.Form)` - admin params, including user params
+ 
+ Optionally, 
+  you may implement `is_valid_for_account(self, account)` for UserForm and AdminForm, 
+  where `account` is an instance of `web.models.ProxyAccount`.
+ This function will be called after Django `is_valid()` validating. 
+ You may use `cleaned_data` to do further validation.

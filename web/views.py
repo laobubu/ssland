@@ -8,7 +8,11 @@ from django.contrib.auth.decorators import login_required
 from web.models import ProxyAccount
 
 from core.util import encodeURIComponent
-import pyqrcode, io, json
+import pyqrcode, io
+
+def FlickBackResponse(request):
+    prevURL = request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else '/'
+    return redirect(prevURL)
 
 def qr_view(request):
     qr = pyqrcode.create(request.GET['data'])
@@ -44,13 +48,13 @@ def logout_view(request):
     return redirect('/')
 
 def index_view(request):
-    return render(request, 'index.html', {'is_authenticated': request.user.is_authenticated})
+    return render(request, 'index.html')
 
 @login_required
 def account_view(request):
     user = request.user
     accounts = ProxyAccount.objects.filter(user = user)
-    return render(request, 'account.html', {'title': 'Accounts', 'user': user, 'accounts': accounts})
+    return render(request, 'account.html', {'title': 'Accounts', 'accounts': accounts})
 
 @login_required
 def account_edit_view(request, service):
@@ -60,7 +64,8 @@ def account_edit_view(request, service):
 
     if request.method == "POST":
         form = UserForm(request.POST)
-        if form.is_valid():
+        bypass_twostep_validate = not (getattr(form, 'is_valid_for_account', None) and True)
+        if form.is_valid() and (bypass_twostep_validate or form.is_valid_for_account(account)):
             account.config.update(form.cleaned_data)
             account.save()
             return redirect('/account/#' + encodeURIComponent(service))
@@ -69,13 +74,9 @@ def account_edit_view(request, service):
             
     return render(request, 'account.edit.html', {
         'title': 'Edit Account', 
-        'user': user, 
         'account': account,
+        'prev': '/account/#' + encodeURIComponent(service),
         'form': form
     })
 
-@login_required
-def ttt_test(request):
-    pa = ProxyAccount(user=request.user, service='Shadowsocks', config='{"port":1234}')
-    pa.save()
-    return redirect('/account/')
+from web import views_admin

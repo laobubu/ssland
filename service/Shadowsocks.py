@@ -11,17 +11,19 @@ import logging
 import time
 import os
 from collections import OrderedDict
-from core.util import get_stdout, encodeURIComponent
+from core.util import get_stdout, encodeURIComponent, random_password
 from core.ssutil import ShadowsocksStat
-from web.models import TrafficStat
+from web.models import TrafficStat, ProxyAccount
 
 config = {
     "executable": "ssserver",
     "config-file": "/etc/shadowsocks.json",
     "manager-address": "/var/run/shadowsocks-manager.sock",
+    "statistic_interval": 7200,
+    "port-range": (6789, 45678),  # used to generate new account
+
     "method": "aes-256-cfb", # will be overridded by config-file
     "server": "127.0.0.1",   # will be overridded by config-file
-    "statistic_interval": 7200,
 }
 
 '''
@@ -113,7 +115,18 @@ def update(ac):
     remove(ac)
     add(ac)
 
-
+def skeleton():
+    import random
+    service_name = __name__.rsplit('.', 1)[1]
+    bad_port = [ acc.config['port'] for acc in ProxyAccount.objects.filter(service=service_name) ]
+    portrng = config["port-range"]
+    while True:
+        port = random.randint(*portrng)
+        if not port in bad_port: break
+    return {
+        "port": port,
+        "sskey": random_password()
+    }
 
 ## Web-panel Related
 
@@ -142,7 +155,18 @@ def html(account_config):
 
 from django import forms
 class UserForm(forms.Form):
-    sskey = forms.CharField(label='Password', max_length=100)
+    sskey = forms.CharField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
+class AdminForm(forms.Form):
+    port = forms.IntegerField(label='Port')
+    sskey = forms.CharField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
+    def is_valid_for_account(self, account):
+        # check duplicated port
+        portpart = '"port":%d\\D' % self.cleaned_data['port']
+        query = ProxyAccount.objects.exclude(pk=account.pk).filter(config__regex=portpart, service=account.service)
+        if query.count() > 0: 
+            self._errors['port'] = ["Port taken by %s" % query[0].user.username]
+        
+        return len(self._errors)==0
 
 # Other Shadowsocks specified functions
 

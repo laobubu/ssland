@@ -41,7 +41,9 @@ a {
     text-align: right;
 }
 
-input[type=text], input[type=password] {
+input[type=text],   input[type=password], 
+input[type=number], input[type=tel] 
+{
     border: none;
     outline: 1px solid #303841;
     box-shadow: 1px solid #303841;
@@ -88,7 +90,8 @@ button:focus, input[type=submit]:focus
     position: relative;
     min-height: 2em;
 }
-.accounts .account.disabled         {    background: #FDD;}
+.accounts .account.disabled         { background: #FDD; }
+.accounts.compact .account          { margin-bottom: .25em}
 
 .accounts .account .float { float: right; }
 .accounts .account h3 { 
@@ -103,6 +106,10 @@ button:focus, input[type=submit]:focus
     text-align: center;
     font-size: 1em;
     color: #666;
+}
+.accounts .account.disabled h3:after{ 
+    content: ' (suspended)';
+    font-size: .7em;
 }
 
 @media screen and (max-width: 800px) {
@@ -136,4 +143,46 @@ table.strip td, table.strip th {
 }
 table.strip tr:nth-child(odd) {
     background: rgba(0, 0, 0, 0.05);
+}
+
+/* white-form */
+.white-form {
+    background-color: #fff;
+    padding: .5em 2em;
+}
+
+.white-form .errorlist {
+    background: #FEE;
+    padding: 0.5em 1em;
+    list-style-position: inside;
+    font-size: 0.87em;
+    border: 1px solid #ECC;
+    position: relative;
+}
+
+.white-form .errorlist:after {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    content: ' ';
+    border: 1em solid transparent;
+    border-top-color: #ECC;
+    pointer-events: none;
+}
+
+.white-form .helptext {
+    display: block;
+    margin: 0em 0px;
+    max-height: 0;
+    
+    transition: max-height .4s ease, margin .4s ease;
+
+    font-size: .8em;
+    color: #999;
+    overflow: hidden;
+}
+.white-form input:focus + .helptext {
+    max-height: 3em;
+    margin: .5em 0px;
 }

@@ -2,12 +2,23 @@
 {% block content %}
 
 <section class="accounts">
-    <h2>Accounts</h2>
+    <h2>{{ title }}</h2>
 {% for account in accounts %}
     <div class="account{% if not account.enabled %} disabled{% endif %}">
         <h3 id="{{ account.service }}">{{ account.service }}</h3>
         {{ account.html | safe }}
-        <p><a href="/account/edit/{{ account.service }}">Edit</a></p>
+        <p>
+            {% if perms.web.change_proxyaccount %}
+                <a class="flick" href="/admin/account/edit/{{ account.pk }}/">Edit</a> {% else %}
+                <a class="flick" href="/account/edit/{{ account.service }}/">Edit</a> {% endif %}
+            {% if perms.web.change_proxyaccount %}
+                <a class="flick" href="/admin/account/toggle/{{ account.pk }}/">Toggle</a> {% endif %}
+        </p>
+        {% if perms.web.change_proxyaccount %}
+        <p>
+            user: {{ account.user.username }}
+        </p>
+        {% endif %}
     </div>
 {% endfor %}
 </section>

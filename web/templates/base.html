@@ -15,7 +15,8 @@
 <header>
   <div>
     <a href="/">Home</a> / 
-    <a href="/account/">Accounts</a> / 
+    {% if user.is_authenticated %}  <a href="/account/">Accounts</a> /    {% endif %}
+    {% if perms.auth.add_user %}    <a href="/admin/user/">Users</a> /    {% endif %}
   </div>
   <div class="right">
 {% if user.is_authenticated %}
@@ -30,6 +31,8 @@
 
 {% endblock %}
 </div>
+
+  <script src="/static/yuck.js"></script>
 </body>
 
 </html>

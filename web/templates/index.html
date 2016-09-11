@@ -2,7 +2,7 @@
 {% block content %}
 
 <p>
-{% if is_authenticated %}
+{% if user.is_authenticated %}
 <a href="/account" class="button">Account</a>
 {% else %}
 <a href="/login" class="button">Login</a>

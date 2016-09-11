@@ -2,15 +2,16 @@
 {% block content %}
 
 <section class="accounts">
-    <h2>Account Edit</h2>
+    <h2>{{ title }}</h2>
     <div class="account{% if not account.enabled %} disabled{% endif %}">
         <h3>{{ account.service }}</h3>
-        <form method="POST" action=".">
+        <form method="POST" action="." class="white-form">
             {% csrf_token %}
             {{ form.as_p }}
             <p>
                 <button type="submit">Save</button>
-                <a href="/account/#{{ account.service }}">Cancel</a>
+                <a href="{{ prev }}">Cancel</a>
+                <input type="hidden" name="prev" value="{{ prev }}">
             </p>
         </form>
     </div>

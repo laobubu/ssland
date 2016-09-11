@@ -62,3 +62,7 @@ def html_strip_table(obj):
         [('  <tr><th>%s</th><td>%s</td></tr>'%(k, escape(str(v)))) for k,v in obj.iteritems()] + 
         ['</table>']
     )
+
+def random_password(N=16):
+    import random, string
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
