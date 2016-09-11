@@ -59,6 +59,6 @@ def html_strip_table(obj):
     from cgi import escape
     return  (
         ['<table class="strip">'] + 
-        [('  <tr><th>%s</th><td>%s</td></tr>'%(k, escape(str(v)))) for (k,v) in obj.items()] + 
+        [('  <tr><th>%s</th><td>%s</td></tr>'%(k, escape(str(v)))) for k,v in obj.iteritems()] + 
         ['</table>']
     )

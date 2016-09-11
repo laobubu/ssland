@@ -13,14 +13,15 @@ import os
 from collections import OrderedDict
 from core.util import get_stdout, encodeURIComponent
 from core.ssutil import ShadowsocksStat
-from web.models import ProxyAccount, TrafficStat
+from web.models import TrafficStat
 
 config = {
     "executable": "ssserver",
     "config-file": "/etc/shadowsocks.json",
     "manager-address": "/var/run/shadowsocks-manager.sock",
-    "method": "aes-256-cfb",
-    "server": "127.0.0.1"
+    "method": "aes-256-cfb", # will be overridded by config-file
+    "server": "127.0.0.1",   # will be overridded by config-file
+    "statistic_interval": 7200,
 }
 
 '''
@@ -32,17 +33,19 @@ account_config format:
 '''
 
 _executable = ('ssserver', )
-_stat = None 
+_stat = None
+_stat_logger = None
 
 ## Basic Control Function
 
 def init(_config):
-    global _executable
+    global _executable, _stat_logger
     config.update(_config)
     _executable = tuple(config["executable"].split(' ')) + (
         '-c', config["config-file"], 
         '--manager-address', config['manager-address']
     )
+    _stat_logger = StatLogger(config["statistic_interval"])
 
 def start(accounts, event_loop=None):
     global _stat
@@ -94,12 +97,13 @@ def start(accounts, event_loop=None):
 
 def stop():
     get_stdout(_executable + ('-d', 'stop'))
-
+    _stat_logger.commit()
 
 
 ## Account Control Function
 
 def add(ac):
+    _stat_logger.bind_port_and_account(ac['port'], ac['id'])
     _manager_command('add', { "server_port": ac['port'], "password": ac['sskey'] })
 
 def remove(ac):
@@ -145,6 +149,37 @@ class UserForm(forms.Form):
 def _manager_command(cmd, payload=None):
     _stat.ctx.command(cmd, payload)
 
+class StatLogger:
+    def __init__(self, commit_interval=7200):
+        self.cache={}
+        self.port_to_account={}
+        self.commit_interval=commit_interval
+        self.next_report_time=time.time()
+
+    def bind_port_and_account(self,port,account_id):
+        self.port_to_account[str(port)] = account_id
+    
+    def handle_report(self, stat_data):
+        '''Handle data from Shadowsocks'''
+        for port_raw, amount in stat_data.iteritems():
+            port=str(port_raw)
+            if not port in self.cache: 
+                self.cache[port] = amount
+            else:
+                self.cache[port] += amount
+        if self.commit_interval and time.time() > self.next_report_time:
+            self.commit()
+            self.next_report_time = time.time() + self.commit_interval
+
+    def commit(self):
+        '''Write current stat into database, and reset the counter'''
+        for port, amount in self.cache.iteritems():
+            if not amount: continue
+            logitem = TrafficStat(amount=amount)
+            logitem.account_id = self.port_to_account[port]
+            logitem.save()
+        self.cache = {}
+
 def _stat_updated(stat_data):
-    print('got stat!!!!')
-    print(stat_data)
+    '''Callback when Shadowsocks reports''' 
+    _stat_logger.handle_report(stat_data)

@@ -47,7 +47,7 @@ def init_all_service():
         if not name in accounts: accounts[name] = []
         accounts[name].append(ac.config)
 
-    for (name, service_config) in config.MODULES.items():
+    for name, service_config in config.MODULES.iteritems():
         if not name in accounts: accounts[name] = []
         service = getService(name)
         service.init(service_config)
