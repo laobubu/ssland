@@ -5,14 +5,21 @@
 
     <p><a class="button" href="./add">Add User</a></p>
 
-    {% for u in users %}
+    {% for m in mix %}
+    {% with u=m.0 accounts=m.1 %}
     <div class="account {% if not u.is_active %} disabled{% endif %}">
         <h3 id="{{ u.username }}">{{ u.username }}</h3>
         
-        <p>
-            <a class="flick" href="/admin/user/toggle/{{ u.pk }}/">Toggle</a>
+        <p class="alink_btns">
+            <a class="flick" href="/admin/user/toggle/{{ u.pk }}/">{% if u.is_active %} Suspend {% else %} Unsuspend {% endif %}</a>
+            {% for pa in accounts %}
+                <a class="flick {% if not pa.enabled %} disabled {% endif %}" href="/admin/account/edit/{{ pa.pk }}/">
+                    {{ pa.service }}
+                </a>
+            {% endfor %}
         </p>
     </div>
+    {% endwith %}
     {% endfor %}
 </section>
 {% endblock %}

@@ -12,14 +12,30 @@ from web.models import ProxyAccount
 
 from web.views import FlickBackResponse
 from core.util import random_password
+from collections import OrderedDict
 import json
 
 @permission_required('auth.add_user')
 def user_list(request):
-    from django.contrib.auth.models import User
+    user_account = {}
+    user_user = {}
+    mix_out = []
+
+    for pa in ProxyAccount.objects.all():
+        pk = pa.user.pk
+        if not pk in user_account: 
+            user_account[pk] = []
+            user_user[pk] = pa.user
+        user_account[pk].append(pa)
+    
+    pks_sorted = user_user.keys()
+    pks_sorted.sort()
+    for pk in pks_sorted:
+        mix_out.append((user_user[pk], user_account[pk]))
+    
     return render(request, 'admin/users.html', {
         'title': 'Users', 
-        'users': User.objects.all(),
+        'mix': mix_out,
     })
 
 class UserAddForm(auth_forms.UserCreationForm):
@@ -96,9 +112,8 @@ def account_edit(request, account_id):
         'form': form
     })
 
-@login_required
-def ttt_test(request):
-    pa = ProxyAccount(user=request.user, service='Shadowsocks', config='{"port":1234}')
-    pa.save()
-    return redirect('/account/')
-
+@permission_required('web.change_proxyaccount')
+def account_edit2(request):
+    if request.method == "POST":
+        pass
+    return FlickBackResponse(request)

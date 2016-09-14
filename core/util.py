@@ -66,3 +66,41 @@ def html_strip_table(obj):
 def random_password(N=16):
     import random, string
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
+
+import datetime
+def smart_datetime(s, last=datetime.datetime.now()):
+    '''turn smart date str into datetime instance.
+
+    Formats:
+     1. exact datetime, like "May 27 1974" or "2012-12-31 23:59:58"
+     2. delta, like "last+1y30d" or "+ 2month,7day"
+     3. special point:
+       - "next week", "next month", "next day"
+    '''
+    import calendar
+    from dateutil.relativedelta import relativedelta
+    import re
+    mat = re.search(r'^(?:last)?\s*\+\s*(.+)', s, re.IGNORECASE)
+    if mat:
+        ret = last
+        span_ss = re.findall(r'(\d*\.?\d+)\s*([ymd])', mat.group(1).lower())
+        for (amount, unit) in span_ss:
+            amount_f = float(amount)
+            if unit == 'y':     ret += relativedelta(years=amount_f)
+            if unit == 'm':     ret += relativedelta(months=amount_f)
+            if unit == 'd':     ret += relativedelta(days=amount_f)
+        ret += relativedelta(hour=0, minute=0, second=0, microsecond=0)
+        return ret
+
+    mat = re.search(r'next\s+(\w+)', s.lower())
+    if mat:
+        type = mat.group(1)
+        ret = last
+        if type == 'week':      ret += relativedelta(days=1, weekday=calendar.firstweekday())
+        if type == 'month':     ret += relativedelta(months=1, day=1)
+        if type == 'day':       ret += relativedelta(days=1)
+        ret += relativedelta(hour=0, minute=0, second=0, microsecond=0)
+        return ret
+    
+    from dateutil.parser import parse as parse_datestr
+    return parse_datestr(s)

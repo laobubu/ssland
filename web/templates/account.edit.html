@@ -8,13 +8,25 @@
         <form method="POST" action="." class="white-form">
             {% csrf_token %}
             {{ form.as_p }}
-            <p>
+            <p class="alink_btns">
                 <button type="submit">Save</button>
                 <a href="{{ prev }}">Cancel</a>
                 <input type="hidden" name="prev" value="{{ prev }}">
             </p>
         </form>
     </div>
+    {% if perms.web.change_proxyaccount %}
+    <div class="account">
+        <h3>Admin</h3>
+        <form action="" method="POST" class="white-form">
+            {% csrf_token %}
+            <p class="alink_btns">
+                <a class="flick {% if not account.enabled %} disabled{% endif %}" href="/admin/account/toggle/{{ account.pk }}/">Suspend</a>
+            </p>
+            <p>CSRF</p>
+        </form>
+    </div>
+    {% endif %}
 </section>
 
 {% endblock %}

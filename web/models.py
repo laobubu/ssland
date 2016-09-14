@@ -5,13 +5,14 @@ from django.db import models
 from django.contrib.auth import models as auth_models
 from jsonfield import JSONField
 from service import getService
-import datetime, json
+from quota import getQuotaModule
+import datetime
  
 class ProxyAccount(models.Model):
     user = models.ForeignKey(auth_models.User)
     service = models.CharField(max_length=130)
     enabled = models.BooleanField(default=False)
-    config = JSONField()
+    config = JSONField(default={})
     log = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     expire_when = models.DateTimeField(default=datetime.datetime(2000,1,1), blank=True)
@@ -66,10 +67,40 @@ class ProxyAccount(models.Model):
         return cl.AdminForm
 
 class TrafficStat(models.Model):
-    account = models.ForeignKey(ProxyAccount)
+    account = models.ForeignKey(ProxyAccount, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True, blank=True)
     amount = models.IntegerField()
 
-class UsageQuota(models.Model):
-    class Meta:
-        abstract = True
+class Quota(models.Model):
+    account = models.ForeignKey(ProxyAccount, on_delete=models.CASCADE)
+    enabled = models.BooleanField(default=True)
+    last_trigged = models.DateTimeField(auto_now_add=True, blank=True)
+    comment = models.CharField(max_length=140, default='')
+    
+    is_alias_of = models.ForeignKey('self', on_delete=models.CASCADE, default=-1)       # clone type and param from this one
+    type = models.CharField(default='Unconfigured', max_length=20)
+    param = JSONField(default={})
+
+    def update_from_alias(self):
+        '''Copy type and param from the alias target, if is_alias_of is set.
+        
+        Call this function before reading type or param.
+        '''
+        if self.is_alias_of_id != -1 :
+            a = self.is_alias_of
+            self.type = a.type
+            self.param = a.param
+
+    def trig(self):
+        self.last_trigged = datetime.datetime.now()
+        self.save()
+        self.account.enabled = False
+        self.account.save()
+
+    def reset(self):
+        self.last_trigged = datetime.datetime.now()
+        self.save()
+    
+    def is_exceeded(self):
+        self.update_from_alias()
+        return getQuotaModule(self.type).is_exceeded(self)

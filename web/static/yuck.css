@@ -84,7 +84,7 @@ button:focus, input[type=submit]:focus
 .accounts .account {
     background: #FFF;
     overflow: hidden;
-    padding: 0 1em;
+    padding: 0;
     padding-left: 150px;
     margin-bottom: 2em;
     position: relative;
@@ -103,7 +103,7 @@ button:focus, input[type=submit]:focus
     top: 0px;
     box-sizing: border-box;
     display: block;
-    text-align: center;
+    text-align: right;
     font-size: 1em;
     color: #666;
 }
@@ -177,6 +177,7 @@ table.strip tr:nth-child(odd) {
     max-height: 0;
     
     transition: max-height .4s ease, margin .4s ease;
+    transition-delay: 1s;
 
     font-size: .8em;
     color: #999;
@@ -185,4 +186,26 @@ table.strip tr:nth-child(odd) {
 .white-form input:focus + .helptext {
     max-height: 3em;
     margin: .5em 0px;
+    transition-delay: 0s;
+}
+
+/* alink_btns */
+.alink_btns {
+    display: flex;
+    line-height: 2em;
+}
+
+.alink_btns a,
+.alink_btns a.button,
+.alink_btns button {
+    display: block;
+    padding: 0 1em;
+    border: 1px solid transparent;
+}
+.alink_btns a.disabled {
+    color: #666;
+    background: #f0f0f0;
+}
+.alink_btns a:hover {
+    border-color: currentColor;
 }

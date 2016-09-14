@@ -2,3 +2,4 @@ Django==1.10.1
 jsonfield
 PyQRCode==1.2
 shadowsocks
+python-dateutil>=2.5.0
