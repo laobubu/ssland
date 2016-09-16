@@ -24,37 +24,39 @@
             {% endif %}
         </p>
     </div>
-    {% if perms.web.change_proxyaccount %}
     <div class="account">
         <h3>Quota</h3>
         {% if quotas %}
         <div class="quotas-list">
         {% for q in quotas %}
-            <div class="quotas-item {% if not q.o.is_really_enabled %} disabled {% endif %}">
+            <div class="quotas-item {% if not q.enabled %} disabled {% endif %}">
                 <h>{{ q.name }}</h>
                 <ul class="quotas-descript-list">
-                    <li>Last trigged: {{ q.o.last_trigged | date:"Y-m-d H:i" }}</li>
                     {% for qdesc in q.desc %}
                     <li>{{ qdesc }}</li>
                     {% endfor %}
+                    <li>Since {{ q.o.last_trigged | date:"Y-m-d H:i" }}</li>
                 </ul>
+                {% if perms.web.change_proxyaccount %}
                 <div class="quotas-actions">
                     <a href="/admin/quota/remove/{{ q.id }}" class="flick">Delete</a>
                     <a href="/admin/quota/toggle/{{ q.id }}" class="flick">Toggle</a>
                     <a href="/admin/quota/reset/{{ q.id }}" class="flick">Reset</a>
                     <a href="/admin/quota/edit/{{ q.id }}">Edit</a>
                 </div>
+                {% endif %}
             </div>
         {% endfor %}
         </div>
         {% else %}
         <p>None</p>
         {% endif %}
+        {% if perms.web.change_proxyaccount %}
         <p>
             <a href="/admin/quota/add_to/{{ account.pk }}" class="button flick">Add</a>
         </p>
+        {% endif %}
     </div>
-    {% endif %}
 </section>
 
 {% endblock %}

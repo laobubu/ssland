@@ -112,6 +112,7 @@ def account_edit(request, account_id):
             'id': quota.pk,
             'name': quota.name,
             'desc': quota.descript(True),
+            'enabled': quota.enabled,
             'o': quota,
         })
 

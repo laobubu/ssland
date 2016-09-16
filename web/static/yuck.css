@@ -125,6 +125,10 @@ button:focus, input[type=submit]:focus
     }
     .accounts .account h3 {
         position: static;
+        text-align: left;
+        padding: 0;
+        margin: 1em 0;
+        width: auto;
     }
 }
 
@@ -151,8 +155,11 @@ table.strip tr:nth-child(odd) {
 
 /* white-form */
 .white-form {
-    background-color: #fff;
+}
+
+.wrapper > .white-form {
     padding: .5em 2em;
+    background-color: #fff;
 }
 
 .white-form .errorlist {
@@ -229,6 +236,12 @@ table.strip tr:nth-child(odd) {
 .quotas-item h {
     float: left;
     line-height: 2.6em;
+}
+@media screen and (max-width: 800px) {
+    .quotas-item h {
+        float: none;
+        line-height: 1.5;
+    }
 }
 .quotas-item.disabled {
     opacity: .5;

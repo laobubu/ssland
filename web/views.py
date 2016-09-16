@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from web.models import ProxyAccount
+from web.models import ProxyAccount, Quota
 
 from core.util import encodeURIComponent
 import pyqrcode, io
@@ -62,6 +62,18 @@ def account_edit_view(request, service):
     account = ProxyAccount.objects.filter(user=user,service=service) [0]
     UserForm = account.form
 
+    quotas = []
+    for quota in Quota.objects.filter(account=account):
+        quota.update_from_alias()
+        if not quota.is_really_enabled: continue
+        quotas.append({
+            'id': quota.pk,
+            'name': quota.name,
+            'desc': quota.descript(),
+            'enabled': True,
+            'o': quota,
+        })
+
     if request.method == "POST":
         form = UserForm(request.POST)
         bypass_twostep_validate = not (getattr(form, 'is_valid_for_account', None) and True)
@@ -76,7 +88,8 @@ def account_edit_view(request, service):
         'title': 'Edit Account', 
         'account': account,
         'prev': '/account/#' + encodeURIComponent(service),
-        'form': form
+        'form': form,
+        'quotas': quotas,
     })
 
 from web import views_admin

@@ -16,7 +16,7 @@ def descript(q, is_admin=False):
         par_when, 
         q.last_trigged
     )
-    ret.append('Expire on %s' % calcdate) 
+    ret.append('Expire on %s' % calcdate.strftime('%Y-%m-%d')) 
     if is_admin: ret.append('Param: %s'%par_when)
     return ret
 
