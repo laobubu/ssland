@@ -73,5 +73,10 @@ if __name__ == "__main__":
     server = SlowHTTPServer(wsgi_app=web_application)
     server.add_to_loop(main_loop)
     
+    # Quota supervisor
+    from core.quota_supervisor import QuotaSupervisor
+    quota_supervisor = QuotaSupervisor()
+    quota_supervisor.add_to_loop(main_loop)
+
     # start the event loop
     main_loop.run()

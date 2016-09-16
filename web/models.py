@@ -101,7 +101,7 @@ class Quota(models.Model):
     @property
     def is_really_enabled(self):
         self.update_from_alias()
-        return self.alias_target_enabled and self.enabled
+        return self.alias_target_enabled and self.enabled and self.account.enabled
 
     @property
     def module(self):
@@ -116,10 +116,9 @@ class Quota(models.Model):
         return self.module.descript(self, is_admin)
 
     def trig(self):
-        self.last_trigged = datetime.datetime.now()
-        self.save()
         self.account.enabled = False
         self.account.save()
+        self.reset()
 
     def reset(self):
         self.last_trigged = datetime.datetime.now()
