@@ -24,6 +24,11 @@ urlpatterns = [
 
     url(r'^admin/account/edit/(?P<account_id>\d+)/$', views.views_admin.account_edit),
     url(r'^admin/account/toggle/(?P<account_id>\d+)/$', views.views_admin.account_toggle),
+    url(r'^admin/quota/add_to/(?P<account_id>\d+)/$', views.views_admin.quota_add),
+    url(r'^admin/quota/edit/(?P<quota_id>\d+)/$', views.views_admin.quota_edit),
+    url(r'^admin/quota/toggle/(?P<quota_id>\d+)/$', views.views_admin.quota_toggle),
+    url(r'^admin/quota/remove/(?P<quota_id>\d+)/$', views.views_admin.quota_remove),
+    url(r'^admin/quota/reset/(?P<quota_id>\d+)/$', views.views_admin.quota_reset),
     url(r'^admin/user/$', views.views_admin.user_list),
     url(r'^admin/user/toggle/(?P<uid>\d+)/$', views.views_admin.user_toggle),
     url(r'^admin/user/add/$', views.views_admin.user_add),

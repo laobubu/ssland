@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from web.models import ProxyAccount
+from web.models import ProxyAccount, Quota
 
 from web.views import FlickBackResponse
 from core.util import random_password
@@ -104,16 +104,88 @@ def account_edit(request, account_id):
             return redirect(prevURL)
     else:
         form = UserForm(initial=account.config)
-            
+    
+    quotas = []
+    for quota in Quota.objects.filter(account=account):
+        quota.update_from_alias()
+        quotas.append({
+            'id': quota.pk,
+            'name': quota.name,
+            'desc': quota.descript(True),
+            'o': quota,
+        })
+
     return render(request, 'account.edit.html', {
         'title': 'Edit Account', 
         'account': account,
         'prev': prevURL,
-        'form': form
+        'form': form,
+        'quotas': quotas,
     })
 
 @permission_required('web.change_proxyaccount')
-def account_edit2(request):
-    if request.method == "POST":
-        pass
+def quota_add(request, account_id):
+    q = Quota(account_id=account_id)
+    q.save()
     return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
+def quota_toggle(request, quota_id):
+    quota = Quota.objects.get(pk=quota_id)
+    quota.enabled = not quota.enabled 
+    quota.save()
+    return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
+def quota_reset(request, quota_id):
+    quota = Quota.objects.get(pk=quota_id)
+    quota.reset()
+    quota.save()
+    return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
+def quota_remove(request, quota_id):
+    quota = Quota.objects.get(pk=quota_id)
+    quota.delete()
+    return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
+def quota_edit(request, quota_id):
+    from quota import getQuotaTypes
+    quota = Quota.objects.get(pk=quota_id)
+    ModuleFormCls = quota.module.Form
+    prevURL =   request.POST['prev'] if 'prev' in request.POST else                 \
+                request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else \
+                '/'
+
+    class FormCls(ModuleFormCls):
+        _quota_type = forms.ChoiceField(choices=getQuotaTypes(), initial=quota.type, label='Quota Type', help_text='Change will be applied after clicking "Save"')
+        _enabled = forms.BooleanField(initial=quota.enabled, label='Enabled', required=False)
+        _last_trigged = forms.DateTimeField(initial=quota.last_trigged, label='Last Trigged')
+    
+    if request.method == "POST":
+        form = FormCls(request.POST)
+        print(form['_quota_type'].value())
+        if form.is_valid():
+            fdata = form.cleaned_data
+            if fdata['_quota_type'] != quota.type:
+                quota.type = fdata['_quota_type']
+                quota.save()
+                return redirect(request.path)
+            quota.enabled = fdata['_enabled']
+            quota.last_trigged = fdata['_last_trigged']
+            del fdata['_quota_type']
+            del fdata['_enabled']
+            del fdata['_last_trigged']
+            quota.param.update(fdata)
+            quota.save()
+            return redirect(prevURL)
+    else:
+        form = FormCls(initial=quota.param)
+
+    return render(request, 'admin/quota.edit.html', {
+        'title': 'Edit Quota',
+        'prev': prevURL,
+        'form': form,
+        'quota': quota,
+    })

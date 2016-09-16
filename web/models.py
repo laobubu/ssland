@@ -81,15 +81,39 @@ class Quota(models.Model):
     type = models.CharField(default='Unconfigured', max_length=20)
     param = JSONField(default={})
 
-    def update_from_alias(self):
+    synced = False
+    alias_target_enabled = True
+
+    def update_from_alias(self, forced=False):
         '''Copy type and param from the alias target, if is_alias_of is set.
         
         Call this function before reading type or param.
         '''
+        if not forced and self.synced: 
+            return
+        self.synced = True
         if self.is_alias_of_id != -1 :
             a = self.is_alias_of
             self.type = a.type
             self.param = a.param
+            self.alias_target_enabled = a.enabled
+    
+    @property
+    def is_really_enabled(self):
+        self.update_from_alias()
+        return self.alias_target_enabled and self.enabled
+
+    @property
+    def module(self):
+        self.update_from_alias()
+        return getQuotaModule(self.type)
+    
+    @property
+    def name(self):
+        return self.module.FRIENDLY_NAME
+    
+    def descript(self, is_admin=False):
+        return self.module.descript(self, is_admin)
 
     def trig(self):
         self.last_trigged = datetime.datetime.now()
@@ -100,7 +124,6 @@ class Quota(models.Model):
     def reset(self):
         self.last_trigged = datetime.datetime.now()
         self.save()
-    
+
     def is_exceeded(self):
-        self.update_from_alias()
-        return getQuotaModule(self.type).is_exceeded(self)
+        return self.module.is_exceeded(self)

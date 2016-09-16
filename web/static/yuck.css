@@ -42,7 +42,8 @@ a {
 }
 
 input[type=text],   input[type=password], 
-input[type=number], input[type=tel] 
+input[type=number], input[type=tel],
+select
 {
     border: none;
     outline: 1px solid #303841;
@@ -75,7 +76,8 @@ button:focus, input[type=submit]:focus
 /* accounts */
 
 .accounts:after,
-.accounts .account:after {
+.accounts .account:after,
+.quotas-item:after {
     display: block;
     content: ' ';
     clear: both;
@@ -84,7 +86,7 @@ button:focus, input[type=submit]:focus
 .accounts .account {
     background: #FFF;
     overflow: hidden;
-    padding: 0;
+    padding: 0 1em;
     padding-left: 150px;
     margin-bottom: 2em;
     position: relative;
@@ -134,8 +136,10 @@ button:focus, input[type=submit]:focus
 table.strip {
     margin: 1em 0;
     border-collapse: collapse;
-    max-width: 90%;
-    display: block;
+}
+table.strip th {
+    width: 5%;
+    white-space: nowrap;
 }
 table.strip td, table.strip th {
     text-align: left;
@@ -183,7 +187,9 @@ table.strip tr:nth-child(odd) {
     color: #999;
     overflow: hidden;
 }
-.white-form input:focus + .helptext {
+.white-form input:focus + .helptext,
+.white-form label:focus + .helptext,
+.white-form select:focus + .helptext {
     max-height: 3em;
     margin: .5em 0px;
     transition-delay: 0s;
@@ -206,6 +212,103 @@ table.strip tr:nth-child(odd) {
     color: #666;
     background: #f0f0f0;
 }
-.alink_btns a:hover {
+.alink_btns a:hover, .alink_btns a:focus {
     border-color: currentColor;
+    outline: none;
+}
+
+.quotas-list {
+    margin: 1em 0;
+}
+.quotas-item {
+    padding: .5em 1em;
+}
+.quotas-item:nth-child(odd) {
+    background-color: #f0f0f0;
+}
+.quotas-item h {
+    float: left;
+    line-height: 2.6em;
+}
+.quotas-item.disabled {
+    opacity: .5;
+}
+.quotas-item.disabled h:after {
+    content: ' (disabled)';
+    font-size: .7em;
+}
+.quotas-actions {
+    z-index: 10;
+    font-size: 0;
+    margin: 0;
+}
+.quotas-actions a
+{
+    font-size: 9pt;
+    padding: .5em 1.5em;
+    opacity: 0.4;
+}
+.quotas-actions a:hover,
+.quotas-actions a:focus 
+{
+    outline: 1px solid currentColor;
+    opacity: 1;
+}
+.quotas-item:hover .quotas-actions a {
+    opacity: 1;
+}
+
+.full-cover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid transparent;
+}
+.full-cover:hover, .full-cover:focus {
+    border: 1px solid currentColor;
+    outline: none;
+}
+.quotas-descript-list {
+    overflow: hidden;
+    font-size: .8em;
+    color: #666;
+    position: relative;
+}
+
+/* yuck-absolute */
+.yuck-absolute {
+    position: absolute;
+    z-index: 100;
+    border: 1px solid #999;
+    background: #fff;
+    padding: .5em 1em;
+    font-size: .7em;
+    line-height: 1.5;
+    max-width: 40vw;
+}
+
+.yuck-absolute ul {
+    margin: .2em 0;
+    padding-left: 1em;
+}
+
+.yuck-absolute p, .yuck-absolute li {
+    margin: 0;
+}
+
+.yuck-absolute .use-this {
+    cursor: pointer;
+    background-color: #f0f0f0;
+    padding: 1px 4px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    display: inline-block;
+    margin: 2px;
+}
+
+.yuck-absolute.hidden {
+    display: none;
+    pointer-events: none;
 }

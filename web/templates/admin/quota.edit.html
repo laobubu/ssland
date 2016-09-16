@@ -7,7 +7,8 @@
     {{ form.as_p }}
     <p class="alink_btns">
         <button type="submit">Save</button>
-        <a href="..">Cancel</a>
+        <a href="{{ prev }}">Cancel</a>
+        <input type="hidden" name="prev" value="{{ prev }}">
     </p>
 </form>
 {% endblock %}
