@@ -17,6 +17,7 @@ opts = {
     # 'daemon'  : 'restart',
     'pid-file': '/var/run/ssland.pid',
     'log-file': '/var/log/ssland.log',
+    'no-http': False,
 }
 
 def print_help():
@@ -25,17 +26,20 @@ A multi-in-one proxy provider
 
 Proxy options:
   -d start/stop/restart     daemon mode
+  -n                        disable built-in http server
 ''')
 
 def parse_opts():
     import getopt
-    shortopts = "hd:s"
-    longopts = ['help', 'daemon']
+    shortopts = "hnd:s"
+    longopts = ['help', 'no-http', 'daemon']
     optlist, _ = getopt.getopt(sys.argv[1:], shortopts, longopts)
     for key, value in optlist:
         if key == '-h' or key == '--help':
             print_help()
             sys.exit(0)
+        elif key == '-n' or key == '--no-http':
+            opts['no-http'] = True
         elif key == '-d' or key == '--daemon':
             opts['daemon'] = value
 
@@ -69,9 +73,10 @@ if __name__ == "__main__":
 
     # WSGI App
     # this is slow. consider uWSGI or other backend
-    from core.httpserver import SlowHTTPServer
-    server = SlowHTTPServer(wsgi_app=web_application)
-    server.add_to_loop(main_loop)
+    if not opts['no-http']:
+        from core.httpserver import SlowHTTPServer
+        server = SlowHTTPServer(wsgi_app=web_application)
+        server.add_to_loop(main_loop)
     
     # Quota supervisor
     from core.quota_supervisor import QuotaSupervisor
