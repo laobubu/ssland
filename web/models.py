@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, absolute_import
 from django.db import models
 from django.contrib.auth import models as auth_models
 from jsonfield import JSONField
@@ -125,4 +126,10 @@ class Quota(models.Model):
         self.save()
 
     def is_exceeded(self):
-        return self.module.is_exceeded(self)
+        try:
+            return self.module.is_exceeded(self)
+        except Exception as e:
+            from core.util import print_exception
+            print_exception(e)
+            print('Failed to judge Quota %d status', self.pk)
+            return False

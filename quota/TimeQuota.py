@@ -27,4 +27,7 @@ def is_exceeded(q):  # q: Quota
         q.param.get('when', '2038-1-1'), 
         q.last_trigged
     )
-    return calcdate <= timezone.now()
+    try:
+        return calcdate <= timezone.now()
+    except:
+        return timezone.make_aware(calcdate, timezone.get_default_timezone()) <= timezone.now()
