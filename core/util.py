@@ -90,7 +90,7 @@ def smart_datetime(s, last=datetime.datetime.now()):
         ret = last
         span_ss = re.findall(r'(\d*\.?\d+)\s*([ymd])', mat.group(1).lower())
         for (amount, unit) in span_ss:
-            amount_f = float(amount)
+            amount_f = int(amount)
             if unit == 'y':     ret += relativedelta(years=amount_f)
             if unit == 'm':     ret += relativedelta(months=amount_f)
             if unit == 'd':     ret += relativedelta(days=amount_f)

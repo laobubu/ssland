@@ -156,6 +156,7 @@ def quota_edit(request, quota_id):
     quota = Quota.objects.get(pk=quota_id)
     ModuleFormCls = quota.module.Form
     prevURL =   request.POST['prev'] if 'prev' in request.POST else                 \
+                request.GET['prev']  if 'prev' in request.GET  else                 \
                 request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else \
                 '/'
 
@@ -168,12 +169,12 @@ def quota_edit(request, quota_id):
         form = FormCls(request.POST)
         if form.is_valid():
             fdata = form.cleaned_data
+            quota.enabled = fdata['_enabled']
+            quota.last_trigged = fdata['_last_trigged']
             if fdata['_quota_type'] != quota.type:
                 quota.type = fdata['_quota_type']
                 quota.save()
-                return redirect(request.path)
-            quota.enabled = fdata['_enabled']
-            quota.last_trigged = fdata['_last_trigged']
+                return redirect(request.path + '?prev='+prevURL)
             del fdata['_quota_type']
             del fdata['_enabled']
             del fdata['_last_trigged']
