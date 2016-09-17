@@ -67,6 +67,11 @@ def random_password(N=16):
     import random, string
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
+def ascii_progress_bar(percent, width=20):
+    pi = int(percent)
+    ps = ''.ljust(int(width * pi / 100), '|').ljust(width, '.')
+    return '[%3d%%] %s' % (pi, ps[:width])
+
 import datetime
 def smart_datetime(s, last=datetime.datetime.now()):
     '''turn smart date str into datetime instance.

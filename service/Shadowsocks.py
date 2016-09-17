@@ -154,11 +154,12 @@ def html(account_config):
 
 
 from django import forms
+from web.forms import VisiblePasswordField
 class UserForm(forms.Form):
-    sskey = forms.CharField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
+    sskey = VisiblePasswordField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
 class AdminForm(forms.Form):
     port = forms.IntegerField(label='Port')
-    sskey = forms.CharField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
+    sskey = VisiblePasswordField(label='Password', max_length=64, help_text='Used to encrypt your data. Make it complex!')
     def is_valid_for_account(self, account):
         # check duplicated port
         portpart = '"port":%d\\D' % self.cleaned_data['port']

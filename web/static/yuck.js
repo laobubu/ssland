@@ -12,6 +12,23 @@ function getScrollXY() {
     return { x: x, y: y }
 }
 
+function genPassword() {
+    return (Math.random().toString(36).slice(-8)) + (Math.random().toString(36).slice(-8))
+}
+
+function user_gen(input_ids) {
+    var ps = genPassword()
+    input_ids.forEach(function(id){
+        var e=document.getElementById(id)
+        e.value = ps
+        e.type = 'text'
+    })
+}
+
+function showRandomPassword() {
+    prompt('Copy and paste into the field.', genPassword())
+}
+
 + function () {
     function flick_handler() {
         var xy = getScrollXY()
