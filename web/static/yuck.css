@@ -240,6 +240,7 @@ table.strip tr:nth-child(odd) {
 }
 .drawer:hover {
     box-shadow: 0 0 2px #3a4750;
+    transform: translateZ(0);
 }
 .drawer:hover .drawer-hidden {
     max-height: 9em;

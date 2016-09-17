@@ -18,21 +18,17 @@ import json
 
 @permission_required('auth.add_user')
 def user_list(request):
-    user_account = {}
-    user_user = {}
+    import config as ssland_config
     mix_out = []
 
-    for pa in ProxyAccount.objects.all():
-        pk = pa.user.pk
-        if not pk in user_account: 
-            user_account[pk] = []
-            user_user[pk] = pa.user
-        user_account[pk].append(pa)
-    
-    pks_sorted = user_user.keys()
-    pks_sorted.sort()
-    for pk in pks_sorted:
-        mix_out.append((user_user[pk], user_account[pk]))
+    for user in User.objects.all():
+        user_accounts = []
+        for service_name in ssland_config.MODULES:
+            try:
+                user_accounts.append( (service_name, ProxyAccount.objects.get(user=user, service=service_name)) )
+            except:
+                user_accounts.append( (service_name, None) )
+        mix_out.append( (user, user_accounts) )
     
     return render(request, 'admin/users.html', {
         'title': 'Users', 
@@ -99,6 +95,15 @@ def user_toggle(request, uid):
             pass
         
     return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
+def account_add(request, uid, service_name):
+    from service import getService
+    s = getService(service_name)
+    conf = s.skeleton()
+    a = ProxyAccount(user_id=int(uid), service=service_name, enabled=False, config=conf)
+    a.save()
+    return redirect('/admin/account/edit/%d/' % a.id)
 
 @permission_required('web.change_proxyaccount')
 def account_toggle(request, account_id):
