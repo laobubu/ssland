@@ -7,3 +7,4 @@ user/*
 typings/
 db.sqlite3
 web/migrations/
+web/article/*

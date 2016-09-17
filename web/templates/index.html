@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 
+
 <p>
 {% if user.is_authenticated %}
-<a href="/account" class="button">Account</a>
+    <a href="/account">Account</a>
+    - View my Proxy accounts
 {% else %}
-<a href="/login" class="button">Login</a>
+    <a href="/login" class="button">Login</a>
 {% endif %}
+</p>
+
+<p>
+    <a href="/article/index/">Knowledge Base</a>
+    - Some information about how to use the proxies.
 </p>
 
 {% endblock %}

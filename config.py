@@ -6,6 +6,8 @@
 
 DEBUG = True
 
+SITE_NAME = 'SSLand'
+
 SECRET_KEY = 'gxj&%ogdyg*%=814tl*gr4^3#m+3(3z0px*8@acs*o$*61q4_+'
 DATABASE_FILENAME = 'db.sqlite3'
 

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title }}{% if title %} - {%endif%}SSLand</title>
+  <title>{{ title }}{% if title %} - {%endif%}{{ site_name }}</title>
   <link rel="stylesheet" href="/static/yuck.css">
 </head>
 
@@ -15,6 +15,7 @@
 <header>
   <div>
     <a href="/">Home</a> / 
+    <a href="/article/index/" title="Knowledge Base">KB</a> /
     {% if user.is_authenticated %}  <a href="/account/">Accounts</a> /    {% endif %}
     {% if perms.auth.add_user %}    <a href="/admin/user/">Users</a> /    {% endif %}
   </div>

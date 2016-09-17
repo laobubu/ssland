@@ -3,6 +3,7 @@
 html {
     background-color: #eeeeee;
     color: #303841;
+    overflow-y: scroll;
 }
 
 * {
@@ -77,7 +78,8 @@ button:focus, input[type=submit]:focus
 
 .accounts:after,
 .accounts .account:after,
-.quotas-item:after {
+.quotas-item:after,
+.article:after {
     display: block;
     content: ' ';
     clear: both;
@@ -154,9 +156,6 @@ table.strip tr:nth-child(odd) {
 }
 
 /* white-form */
-.white-form {
-}
-
 .wrapper > .white-form {
     padding: .5em 2em;
     background-color: #fff;
@@ -350,4 +349,52 @@ table.strip tr:nth-child(odd) {
 .yuck-absolute.hidden {
     display: none;
     pointer-events: none;
+}
+
+/* article */
+.article {
+    padding: .5em 2em;
+    background-color: #fff;
+    line-height: 1.5;
+}
+
+.article .toc {
+    float: right;
+    border: 1px solid #666;
+    margin: 1em;
+    margin-right: 0;
+    font-size: .8em;
+}
+
+.article .toc:before {
+    content: 'Table of Content';
+    display: block;
+    color: #FFF;
+    text-align: center;
+    padding: .5em;
+    background-color: #666;
+}
+
+.article .toc ul{
+    list-style-position: inside;
+    padding-left: 1em;
+    margin-right: .5em;
+}
+
+.article pre {
+    background: #eeeeee;
+    padding: 1em;
+    overflow: auto;
+}
+
+.article code {
+    background: #eeeeee;
+    padding: 2px 4px;
+    font-size: .87em;
+}
+
+.article blockquote {
+    border-left: 10px solid #eeeeee;
+    margin-left: 0;
+    padding: .2em 1em;
 }

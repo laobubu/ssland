@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from django.http import HttpResponse
+from django.template import Template, RequestContext
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import forms as auth_forms
@@ -50,6 +51,64 @@ def logout_view(request):
 
 def index_view(request):
     return render(request, 'index.html')
+
+def article_view(request, name):
+    from os import path
+    import re
+
+    c = []
+    d = {}
+
+    try:
+        p = path.join(path.dirname(__file__), 'article', name+'.html')
+        f = file(p, 'r')
+    except:
+        try:
+            p = path.join(path.dirname(__file__), 'article', name+'.md')
+            f = file(p, 'r')
+            d['syntax'] = 'markdown'
+        except:
+            return HttpResponse('Article not Found.')
+
+    for l in f.readlines():
+        m = re.search(r'^set\s+(\w+)\s*=?\s*(.*?)\s*$', l, re.IGNORECASE)
+        if m:   d[m.group(1)] = m.group(2)
+        else:   c.append(l)
+    c = ''.join(c)
+
+    if 'login_required' in d and request.user.is_anonymous:
+        return redirect('/login')
+
+    syntax = d.get('syntax', 'html').lower()
+    
+    if syntax == 'markdown':
+        try:
+            import markdown
+            html = markdown.markdown(c, extensions=['markdown.extensions.extra', 'markdown.extensions.toc'])
+        except ImportError:
+            html = '''
+            <p>Python module <code>markdown</code> is not installed.</p>
+            <p>Install and refresh this page.</p>
+
+            <pre># pip install markdown</pre>
+            '''
+        except Exception as e:
+            html = '<p>Failed to Render Markdown.</p><pre>%s</pre>' % e
+    else:
+        html = c
+    
+    t = Template('\n'.join([
+        '{% extends "base.html" %}',
+        '{% block content %}',
+        '<h2>{{ title }}</h2>'
+        '<div class="article">',
+        html,
+        '</div>',
+        '{% endblock %}'
+    ]))
+    
+    context = RequestContext(request, d)
+    return HttpResponse(t.render(context))
 
 @login_required
 def passwd_view(request):

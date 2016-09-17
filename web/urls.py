@@ -24,6 +24,8 @@ urlpatterns = [
 
     url(r'^passwd/$', views.passwd_view),
 
+    url(r'^article/(?P<name>\w+)/$', views.article_view),
+
     url(r'^admin/account/add/(?P<uid>\d+)/(?P<service_name>\w+)/$', views.views_admin.account_add),
     url(r'^admin/account/edit/(?P<account_id>\d+)/$', views.views_admin.account_edit),
     url(r'^admin/account/toggle/(?P<account_id>\d+)/$', views.views_admin.account_toggle),
