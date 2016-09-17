@@ -10,14 +10,26 @@
     <div class="account {% if not u.is_active %} disabled{% endif %}">
         <h3 id="{{ u.username }}">{{ u.username }}</h3>
         
-        <p class="alink_btns">
-            <a class="flick" href="/admin/user/toggle/{{ u.pk }}/">{% if u.is_active %} Suspend {% else %} Unsuspend {% endif %}</a>
+        <div class="alink_btns">
+            <div class="drawer">
+                <a>Account</a>
+                <div class="drawer-hidden">
+                    <a href="/admin/user/toggle/{{ u.pk }}/" class="flick">{% if u.is_active %} Suspend {% else %} Unsuspend {% endif %}</a>
+                    <a href="/admin/user/edit/{{ u.pk }}/" class="flick">Edit</a>
+                </div>
+            </div>
             {% for pa in accounts %}
+            <div class="drawer">
                 <a class="flick {% if not pa.enabled %} disabled {% endif %}" href="/admin/account/edit/{{ pa.pk }}/">
                     {{ pa.service }}
                 </a>
+                <div class="drawer-hidden">
+                    <a href="/admin/account/quick/{{ pa.pk }}/renew/" class="flick" title="Reset all quotas and unsuspend account.">Renew</a>
+                    <a href="/admin/account/toggle/{{ pa.pk }}/" class="flick">Toggle</a>
+                </div>
+            </div>
             {% endfor %}
-        </p>
+        </div>
     </div>
     {% endwith %}
     {% endfor %}

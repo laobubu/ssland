@@ -182,7 +182,9 @@ table.strip tr:nth-child(odd) {
     pointer-events: none;
 }
 
-.white-form .helptext {
+.white-form .helptext,
+.white-form .minor,
+.white-form p+ul {
     display: block;
     margin: 0em 0px;
     max-height: 0;
@@ -196,7 +198,9 @@ table.strip tr:nth-child(odd) {
 }
 .white-form input:focus + .helptext,
 .white-form label:focus + .helptext,
-.white-form select:focus + .helptext {
+.white-form select:focus + .helptext,
+.white-form .minor,
+.white-form p+ul {
     max-height: 3em;
     margin: .5em 0px;
     transition-delay: 0s;
@@ -206,6 +210,7 @@ table.strip tr:nth-child(odd) {
 .alink_btns {
     display: flex;
     line-height: 2em;
+    margin: .5em 0;
 }
 
 .alink_btns a,
@@ -219,9 +224,29 @@ table.strip tr:nth-child(odd) {
     color: #666;
     background: #f0f0f0;
 }
-.alink_btns a:hover, .alink_btns a:focus {
+.alink_btns a[href]:hover, .alink_btns a[href]:focus {
     border-color: currentColor;
     outline: none;
+}
+
+/*drawer*/
+.drawer-hidden {
+    display: flex;
+    flex-direction: column;
+    max-height: 0em;
+    transition: max-height .4s ease;
+    overflow: hidden;
+    font-size: .7em;
+}
+.drawer:hover {
+    box-shadow: 0 0 2px #3a4750;
+}
+.drawer:hover .drawer-hidden {
+    max-height: 9em;
+    border-top: 1px solid #CCC;
+}
+.drawer-hidden p {
+    margin: 0.1em 1em;
 }
 
 .quotas-list {

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{title}}</h2>
+
+<form method="POST" action="." class="white-form">
+    {{ form.as_p }}
+    <p class="minor">Notice: this password is for this website only, and proxy accounts will not be affected.</p>
+    <p class="alink_btns">
+        <button type="submit">Save</button>
+        <a href="{{ prev | escape }}">Cancel</a>
+    </p>
+    {% csrf_token %}
+    <input type="hidden" name="prev" value="{{ prev | escape }}">
+</form>
+
+{% endblock %}

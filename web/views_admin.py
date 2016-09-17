@@ -11,8 +11,9 @@ from django.contrib.auth.decorators import login_required, permission_required
 from web.models import ProxyAccount, Quota
 
 from web.views import FlickBackResponse
-from core.util import random_password
+from core.util import random_password, get_prev_uri, encodeURIComponent
 from collections import OrderedDict
+import logging
 import json
 
 @permission_required('auth.add_user')
@@ -62,6 +63,25 @@ def user_add(request):
         'form': form,
     })
 
+@permission_required('auth.change_user')
+def user_edit(request, uid):
+    u = User.objects.get(pk=uid)
+    prevURL = get_prev_uri(request)
+
+    if request.method == "POST":
+        form = auth_forms.AdminPasswordChangeForm(u, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(prevURL)
+    else:
+        form = auth_forms.AdminPasswordChangeForm(u)
+    
+    return render(request, 'user.edit.html', {
+        'title': 'Edit User "%s"' % u.username,
+        'prev': prevURL,
+        'form': form,
+    })
+
 @permission_required('auth.add_user')
 def user_toggle(request, uid):
     if str(uid) == str(request.user.pk):
@@ -88,12 +108,21 @@ def account_toggle(request, account_id):
     return FlickBackResponse(request)
 
 @permission_required('web.change_proxyaccount')
+def account_quick(request, account_id, action):
+    account = ProxyAccount.objects.get(pk=account_id)
+    if action == "renew":
+        logging.info('Renew account %d', account.pk)
+        for quota in Quota.objects.filter(account=account, enabled=True):
+            quota.reset()
+        account.enabled = True
+        account.save()
+    return FlickBackResponse(request)
+
+@permission_required('web.change_proxyaccount')
 def account_edit(request, account_id):
     account = ProxyAccount.objects.get(pk=account_id)
     UserForm = account.adminForm
-    prevURL =   request.POST['prev'] if 'prev' in request.POST else                 \
-                request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else \
-                '/'
+    prevURL =   get_prev_uri(request)
 
     if request.method == "POST":
         form = UserForm(request.POST)
@@ -155,10 +184,7 @@ def quota_edit(request, quota_id):
     from quota import getQuotaTypes
     quota = Quota.objects.get(pk=quota_id)
     ModuleFormCls = quota.module.Form
-    prevURL =   request.POST['prev'] if 'prev' in request.POST else                 \
-                request.GET['prev']  if 'prev' in request.GET  else                 \
-                request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else \
-                '/'
+    prevURL =   get_prev_uri(request)
 
     class FormCls(ModuleFormCls):
         _quota_type = forms.ChoiceField(choices=getQuotaTypes(), initial=quota.type, label='Quota Type', help_text='Change will be applied after clicking "Save"')
@@ -174,7 +200,7 @@ def quota_edit(request, quota_id):
             if fdata['_quota_type'] != quota.type:
                 quota.type = fdata['_quota_type']
                 quota.save()
-                return redirect(request.path + '?prev='+prevURL)
+                return redirect(request.path + '?prev='+encodeURIComponent(prevURL))
             del fdata['_quota_type']
             del fdata['_enabled']
             del fdata['_last_trigged']

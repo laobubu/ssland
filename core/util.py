@@ -72,6 +72,13 @@ def ascii_progress_bar(percent, width=20):
     ps = ''.ljust(int(width * pi / 100), '|').ljust(width, '.')
     return '[%3d%%] %s' % (pi, ps[:width])
 
+def get_prev_uri(request):
+    '''used in SSLand web UI'''
+    return  request.POST['prev'] if 'prev' in request.POST else                 \
+            request.GET['prev']  if 'prev' in request.GET  else                 \
+            request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else \
+            '/'
+
 import datetime
 def smart_datetime(s, last=datetime.datetime.now()):
     '''turn smart date str into datetime instance.

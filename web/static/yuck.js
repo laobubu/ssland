@@ -69,7 +69,7 @@ function showRandomPassword() {
             '<p>or an expression relative to <b>last trigged time</b></p>', 
             '<ul>',
             '<li><code class="use-this">next month</code> <code class="use-this">next week</code> <code class="use-this">next day</code></li>',
-            '<li><code class="use-this">+2month 15days</code> <code class="use-this">+7d</code></li>',
+            '<li><code class="use-this">+1month</code> <code class="use-this">+1m 15d</code></li>',
             '</ul>' 
         ].join('')
 

@@ -20,9 +20,11 @@
   </div>
   <div class="right">
 {% if user.is_authenticated %}
-    {{ user.username }} / <a href="/logout">Logout</a>
+  {{ user.username }}
+  / <a href="/passwd/">Passwd</a>
+  / <a href="/logout/">Logout</a>
 {% else %}
-    <a href="/login">Login</a>
+    <a href="/login/">Login</a>
 {% endif %}
   </div>
 </header>

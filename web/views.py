@@ -4,14 +4,15 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.decorators import login_required
 from web.models import ProxyAccount, Quota
 
-from core.util import encodeURIComponent
+from core.util import encodeURIComponent, get_prev_uri
 import pyqrcode, io
 
 def FlickBackResponse(request):
-    prevURL = request.META['HTTP_REFERER'] if 'HTTP_REFERER' in request.META else '/'
+    prevURL = get_prev_uri(request)
     return redirect(prevURL)
 
 def qr_view(request):
@@ -49,6 +50,25 @@ def logout_view(request):
 
 def index_view(request):
     return render(request, 'index.html')
+
+@login_required
+def passwd_view(request):
+    u = request.user
+    prevURL = get_prev_uri(request)
+
+    if request.method == "POST":
+        form = auth_forms.PasswordChangeForm(u, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(prevURL)
+    else:
+        form = auth_forms.PasswordChangeForm(u)
+    
+    return render(request, 'user.edit.html', {
+        'title': 'Edit Password',
+        'prev': prevURL,
+        'form': form,
+    })
 
 @login_required
 def account_view(request):
