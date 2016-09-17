@@ -166,7 +166,6 @@ def quota_edit(request, quota_id):
     
     if request.method == "POST":
         form = FormCls(request.POST)
-        print(form['_quota_type'].value())
         if form.is_valid():
             fdata = form.cleaned_data
             if fdata['_quota_type'] != quota.type:

@@ -22,9 +22,9 @@ def descript(q, is_admin=False):
 
 def is_exceeded(q):  # q: Quota
     from core.util import smart_datetime
-    import datetime
+    from django.utils import timezone
     calcdate = smart_datetime(
         q.param.get('when', '2038-1-1'), 
         q.last_trigged
     )
-    return calcdate <= datetime.datetime.now()
+    return calcdate <= timezone.now()

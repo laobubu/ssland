@@ -6,7 +6,6 @@ from django.contrib.auth import models as auth_models
 from jsonfield import JSONField
 from service import getService
 from quota import getQuotaModule
-import datetime
  
 class ProxyAccount(models.Model):
     user = models.ForeignKey(auth_models.User)
@@ -15,7 +14,7 @@ class ProxyAccount(models.Model):
     config = JSONField(default={})
     log = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    expire_when = models.DateTimeField(default=datetime.datetime(2000,1,1), blank=True)
+    expire_when = models.DateTimeField(auto_now_add=True, blank=True)
 
     @property
     def is_active(self):
@@ -121,7 +120,8 @@ class Quota(models.Model):
         self.reset()
 
     def reset(self):
-        self.last_trigged = datetime.datetime.now()
+        from django.utils import timezone
+        self.last_trigged = timezone.now()
         self.save()
 
     def is_exceeded(self):

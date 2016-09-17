@@ -7,6 +7,7 @@ import sys
 import atexit
 
 import config
+import logging
 from web.wsgi import application as web_application
 from service import getService
 from shadowsocks import eventloop, daemon
@@ -26,7 +27,7 @@ A multi-in-one proxy provider
 
 Proxy options:
   -d start/stop/restart     daemon mode
-  -n                        disable built-in http server
+  -n , --no-http            disable built-in http server
 ''')
 
 def parse_opts():
@@ -65,6 +66,12 @@ if __name__ == "__main__":
 
     parse_opts()
     daemon.daemon_exec(opts)
+
+    if config.DEBUG:
+        logging.basicConfig(level=logging.DEBUG,
+            format='[%(asctime)s] %(levelname)s: %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
 
     main_loop = eventloop.EventLoop()
     
