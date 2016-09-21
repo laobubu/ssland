@@ -22,8 +22,11 @@ config = {
     "statistic_interval": 7200,
     "port-range": (6789, 45678),  # used to generate new account
 
-    "method": "aes-256-cfb", # will be overridded by config-file
-    "server": "127.0.0.1",   # will be overridded by config-file
+    # The infos that display on website. 
+    # 1. leave them empty and SSLand will read the config file.
+    # 2. or write something. this will not affect the config file.
+    "server": "",
+    "method": "",
 }
 
 '''
@@ -59,6 +62,9 @@ def start(accounts, event_loop=None):
     try:    conf = json.load(open(conf_filename, 'r'))
     except: conf = {"server": "0.0.0.0", "timeout": 300, "method": "aes-256-cfb"}
     
+    if not config['server']: config['server'] = conf['server']
+    if not config['method']: config['method'] = conf['method']
+
     pps = conf['port_password'] if 'port_password' in conf else {}
     if "server_port" in conf and "password" in conf:
         logging.warn("removing server_port and password fields in %s", conf_filename)
@@ -73,6 +79,12 @@ def start(accounts, event_loop=None):
         logging.warn('No active account in %s', conf_filename)
         temp_port = 54301
         pps[temp_port] = "ssland-temp-account"
+    elif len(pps) == 1:
+        temp_port = pps.keys()[0]
+        if pps[temp_port] == "ssland-temp-account":
+            temp_port = int(temp_port)
+        else:
+            temp_port = 0
     
     conf['port_password'] = pps
     json.dump(conf, open(conf_filename, 'w'))

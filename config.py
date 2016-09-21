@@ -15,6 +15,7 @@ DATABASE_FILENAME = 'db.sqlite3'
 
 MODULES = {
     "Shadowsocks": {
+        # see /service/Shadowsocks.py
         "executable": "ssserver",
         "config-file": "/etc/shadowsocks.json",
         "manager-address": "/var/run/shadowsocks-manager.sock",
