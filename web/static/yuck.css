@@ -44,6 +44,7 @@ a {
 
 input[type=text],   input[type=password], 
 input[type=number], input[type=tel],
+input[type=date],
 select
 {
     border: none;
@@ -397,4 +398,83 @@ table.strip tr:nth-child(odd) {
     border-left: 10px solid #eeeeee;
     margin-left: 0;
     padding: .2em 1em;
+}
+
+/* traffic-graph */
+.traffic-graph {
+    position: relative;
+    background: #fff;
+    overflow: visible;
+    height: 20em;
+    margin-bottom: 2em;
+}
+
+.traffic-graph > .item {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: #26a;
+    z-index: 2;
+}
+
+.traffic-graph > .item .desc {
+    display: none;
+    background: #37b;
+    color: #FFF;
+    font-size: .7em;
+    padding: .5em 1em;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.traffic-graph > .item.right .desc {
+    left: auto;
+    right: 0;
+}
+
+.traffic-graph > .item:hover {
+    background: #37b;
+}
+
+.traffic-graph > .item:hover:before {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: 0;
+    border: .4em solid #ee3;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.traffic-graph > .item:hover .desc {
+    display: block;
+}
+
+.traffic-graph .empty {
+    text-align: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    margin-top: -.5em;
+}
+
+.traffic-graph > .grid {
+    color: #F99;
+    font-size: .7em;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 300px;
+    border-left: 1px solid #F99;
+    pointer-events: none;
+}
+.traffic-graph > .grid.right {
+    border-right: 1px solid #F99;
+    border-left: none;
+    margin-left: -300px;
+    text-align: right;
 }

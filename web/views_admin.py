@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from web.models import ProxyAccount, Quota
+from web.models import ProxyAccount, Quota, TrafficStat
 
 from web.views import FlickBackResponse
 from core.util import random_password, get_prev_uri, encodeURIComponent
@@ -95,6 +95,18 @@ def user_toggle(request, uid):
             pass
         
     return FlickBackResponse(request)
+
+@login_required
+def account_traffic(request, account_id):
+    account = ProxyAccount.objects.get(pk=account_id)
+    user = account.user
+    stats = TrafficStat.objects.filter(account=account)
+    from .views_generic import generate_traffic_view
+    return generate_traffic_view(
+        request, 
+        stats, 
+        title = 'Traffic of %s.%s' % (user.username, account.service)
+    )
 
 @permission_required('web.change_proxyaccount')
 def account_add(request, uid, service_name):

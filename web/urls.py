@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^admin/account/add/(?P<uid>\d+)/(?P<service_name>\w+)/$', views.views_admin.account_add),
     url(r'^admin/account/edit/(?P<account_id>\d+)/$', views.views_admin.account_edit),
     url(r'^admin/account/toggle/(?P<account_id>\d+)/$', views.views_admin.account_toggle),
+    url(r'^admin/account/traffic/(?P<account_id>\d+)/$', views.views_admin.account_traffic),
     url(r'^admin/account/quick/(?P<account_id>\d+)/(?P<action>\w+)/$', views.views_admin.account_quick),
     url(r'^admin/quota/add_to/(?P<account_id>\d+)/$', views.views_admin.quota_add),
     url(r'^admin/quota/edit/(?P<quota_id>\d+)/$', views.views_admin.quota_edit),
@@ -42,6 +43,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^account/$', views.account_view),
+    url(r'^account/traffic/(?P<service>\w+)/$', views.traffic_view),
     url(r'^account/edit/(?P<service>\w+)/$', views.account_edit_view),
 
     url(r'^qr\.svg$', views.qr_view),

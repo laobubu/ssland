@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% load humanize %}
+
+<h2>{{title}}</h2>
+
+<div class="traffic-graph">
+    {% for g in grids %}
+        <div class="grid{% if g.x_percent > 70 %} right{%endif%}" style="left:{{ g.x_percent }}%">
+            {{ g.time | date:"m-d" }}
+        </div>
+    {% endfor %}
+
+    {% for s in stats %}
+        <div 
+                class="item{% if s.x_percent > 70 %} right{%endif%}" 
+                style="left:{{ s.x_percent }}%;top:{{ s.y_percent_rev }}%"
+                data-time="{{ s.time | date:'Y-m-d H:i:s' }}"
+                data-delta="{{ s.amount }}"
+        >
+            <div class="desc">
+                {{ s.time | date:'Y-m-d H:i:s' }} <br>
+                {{ s.sum | filesizeformat }} ( {{ s.sum | intcomma }} bytes )
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty">
+            No data
+        </div>
+    {% endfor %}
+</div>
+
+<form action="." method="GET" class="white-form">
+    <p>
+        From <input type="date" name="from" value="{{ qfrom | date:'Y-m-d' }}" placeholder="2013-12-31"> 
+        to   <input type="date" name="to"   value="{{ qto   | date:'Y-m-d' }}">
+        <button type="submit">Query</button> 
+    </p>
+</form>
+
+{% endblock %}

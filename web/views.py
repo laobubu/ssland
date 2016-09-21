@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.decorators import login_required
-from web.models import ProxyAccount, Quota
+from web.models import ProxyAccount, Quota, TrafficStat
 
 from core.util import encodeURIComponent, get_prev_uri
 import pyqrcode, io
@@ -136,9 +136,18 @@ def account_view(request):
     return render(request, 'account.html', {'title': 'Accounts', 'accounts': accounts})
 
 @login_required
+def traffic_view(request, service):
+    user = request.user
+    account = ProxyAccount.objects.get(user=user, service=service)
+    stats = TrafficStat.objects.filter(account=account)
+    from .views_generic import generate_traffic_view
+    return generate_traffic_view(request, stats, title='Traffic of %s'%service)
+
+
+@login_required
 def account_edit_view(request, service):
     user = request.user
-    account = ProxyAccount.objects.filter(user=user,service=service) [0]
+    account = ProxyAccount.objects.get(user=user,service=service)
     UserForm = account.form
 
     quotas = []

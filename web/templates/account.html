@@ -5,7 +5,12 @@
     <h2>{{ title }}</h2>
 {% for account in accounts %}
     <div class="account{% if not account.enabled %} disabled{% endif %}">
-        <h3 id="{{ account.service }}">{{ account.service }}</h3>
+        <h3 id="{{ account.service }}">
+            {{ account.service }}
+        {% if perms.web.change_proxyaccount %}
+           <br> <small>{{ account.user.username }}</small> <br>
+        {% endif %}
+        </h3>
         {{ account.html | safe }}
         <p class="alink_btns">
             {% if perms.web.change_proxyaccount %}
@@ -13,12 +18,10 @@
                 <a class="flick" href="/account/edit/{{ account.service }}/">Edit</a> {% endif %}
             {% if perms.web.change_proxyaccount %}
                 <a class="flick" href="/admin/account/toggle/{{ account.pk }}/">Toggle</a> {% endif %}
+            {% if perms.web.change_proxyaccount %}
+                <a class="flick" href="/admin/account/traffic/{{ account.pk }}/">Stat</a> {% else %}
+                <a class="flick" href="/account/traffic/{{ account.service }}/">Stat</a> {% endif %}
         </p>
-        {% if perms.web.change_proxyaccount %}
-        <p>
-            user: {{ account.user.username }}
-        </p>
-        {% endif %}
     </div>
 {% endfor %}
 </section>
