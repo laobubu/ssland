@@ -8,7 +8,7 @@ class SlowHTTPServer():
     `server` is the WSGIServer instance.
     '''
 
-    def __init__(self, wsgi_app):
+    def __init__(self, wsgi_app, port=8000):
         from web.urls import urlpatterns
         from wsgiref.simple_server import make_server
         from django.conf.urls import url
@@ -27,7 +27,7 @@ class SlowHTTPServer():
                 resp = HttpResponseNotFound()
             return resp
         urlpatterns.append(url(r'^static/(?P<path>[^\?]+)$', static_view))
-        self.server = make_server('', 8000, wsgi_app)
+        self.server = make_server('', port, wsgi_app)
     
     def add_to_loop(self, loop):
         loop.add(self.server, eventloop.POLL_IN, self)

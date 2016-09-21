@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # this is slow. consider uWSGI or other backend
     if not opts['no-http']:
         from core.httpserver import SlowHTTPServer
-        server = SlowHTTPServer(wsgi_app=web_application)
+        server = SlowHTTPServer(wsgi_app=web_application, port=config.HTTP_PORT)
         server.add_to_loop(main_loop)
     
     # Quota supervisor
