@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source common.sh
+echo "Starting SSLand Setup..."
+
+source $(dirname "$0")/common.sh
 
 if grep -Ps 'WIZARD_GENERATED' config.py; then
     echo "SSLand setup script was executed before."
@@ -12,7 +14,7 @@ fi
 
 echo "[ALLOWED_HOSTS]"
 
-if grep -Ps 'ALLOWED_HOSTS\s*=\s*\[\s*\]' web/settings.py; then
+if grep -Pq 'ALLOWED_HOSTS\s*=\s*\[\s*\]' web/settings.py; then
     echo "You must set the allowed hostname (domain or IP)."
     echo "If you don't want to filter (not recommended), just press Enter key."
     read -r -p "Hostname: " domain
@@ -25,8 +27,8 @@ fi
 
 echo "[SITE_CONFIG]"
 
-SITE_NAME = $(read2 "Site name" "SSLand" )
-HTTP_PORT = $(read2 "HTTP Port" "8000" )
+SITE_NAME="$(read2 'Site name' 'SSLand' )"
+HTTP_PORT="$(read2 'HTTP Port' '8000' )"
 
 sed config.py -r -i                                             \
     -e "s|^SITE_NAME.+$|SITE_NAME = '${SITE_NAME}'|"            \
@@ -38,7 +40,7 @@ echo "[DJANGO]"
 
 ./tools/init_django.sh
 
-[ -d .git ] && git commit -am "Finish the setup wizard."
+[ -d .git ] && git commit -am "Finish the setup wizard." >/dev/null 
 
 echo "[FINISHED]"
 

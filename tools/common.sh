@@ -1,4 +1,4 @@
-if   [ -f ../ssland.py ]; then cd ..
+if   [ -f ../ssland.py ]; then cd .. ; fi
 
 [ ! -f ssland.py ] && { echo "Please run this script on SSLand directory." >&2; exit 1; }
 [ ! $EUID = 0 ] && { echo "The root privilege is required. Aborting." >&2; exit 1; }
