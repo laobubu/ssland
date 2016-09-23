@@ -30,6 +30,7 @@ class ProxyAccount(models.Model):
         getService(self.service).add(self.config)
 
     def save(self, *args, **kw):
+        self.config['id'] = self.pk
         try:
             orig = ProxyAccount.objects.get(pk=self.pk)
             serv = getService(self.service)
@@ -48,7 +49,6 @@ class ProxyAccount(models.Model):
             import logging
             print_exception(e2)
             logging.error("Failed to update service for ProxyAccount %d", self.pk)
-        self.config['id'] = self.pk
         super(ProxyAccount, self).save(*args, **kw)
 
     @property

@@ -3,6 +3,9 @@
 
 <section class="accounts">
     <h2>{{ title }}</h2>
+    {% if perms.web.change_proxyaccount %}
+    <p>To manage users' accounts, visit <a href="/admin/user/">Users</a> page.</p>
+    {% endif %}
 {% for account in accounts %}
     <div class="account{% if not account.enabled %} disabled{% endif %}">
         <h3 id="{{ account.service }}">

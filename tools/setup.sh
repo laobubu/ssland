@@ -4,7 +4,7 @@ echo "Starting SSLand Setup..."
 
 source $(dirname "$0")/common.sh
 
-if grep -Ps 'WIZARD_GENERATED' config.py; then
+if grep -P 'WIZARD_GENERATED' config.py; then
     echo "SSLand setup script was executed before."
     confirm "Still continue?" || exit 0
 else
@@ -45,4 +45,8 @@ echo "[DJANGO]"
 echo "[FINISHED]"
 
 echo "To start SSLand daemon, please execute  ./ssland.py -d start"
-confirm "Start now?" && ./ssland.py -d restart
+if confirm "Start now?"; then 
+    ./ssland.py -d stop >/dev/null 2>&1 #not necessary
+    
+    ./ssland.py -d start
+fi

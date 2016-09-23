@@ -224,6 +224,9 @@ table.strip tr:nth-child(odd) {
     color: #666;
     background: #f0f0f0;
 }
+.alink_btns a:not([href]) {
+    color: #666;
+}
 .alink_btns a[href]:hover, .alink_btns a[href]:focus {
     border-color: currentColor;
     outline: none;
