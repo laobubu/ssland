@@ -81,6 +81,7 @@ if __name__ == "__main__":
     # WSGI App
     # this is slow. consider uWSGI or other backend
     if not opts['no-http']:
+        logging.info('Starting HTTP Server on %d', config.HTTP_PORT)
         from core.httpserver import SlowHTTPServer
         server = SlowHTTPServer(wsgi_app=web_application, port=config.HTTP_PORT)
         server.add_to_loop(main_loop)

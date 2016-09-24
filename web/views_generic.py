@@ -60,7 +60,6 @@ def generate_traffic_view(request, stats_objects, title, padding=0.05):
     _gtime = timezone.datetime(tfrom.year, tfrom.month, tfrom.day, tzinfo=timezone.get_current_timezone())
     while True:
         _percent = get_percent(_gtime)
-        _gtime += timezone.timedelta(days=1) # FIXME: shall not be here? but it works!
         if _percent > 100: break
         if _percent > 0:
             grids.append({

@@ -1,19 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 
+<h1>Welcome to {{ site_name }}</h1>
 
-<p>
-{% if user.is_authenticated %}
-    <a href="/account">Account</a>
-    - View my Proxy accounts
-{% else %}
-    <a href="/login" class="button">Login</a>
-{% endif %}
-</p>
+<ul class="homepage-links">
+    <li>
+    {% if user.is_authenticated %}
+        <a href="/account">Accounts</a> - View my Proxy accounts
+    {% else %}
+        <a href="/login">Login</a>
+    {% endif %}
+    </li>
 
-<p>
-    <a href="/article/index/">Knowledge Base</a>
-    - Some information about how to use the proxies.
-</p>
+    <li>
+        <a href="/article/index/">Knowledge Base</a> - Some information about how to use the proxies.
+    </li>
+</ul>
 
 {% endblock %}

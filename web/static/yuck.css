@@ -220,12 +220,13 @@ table.strip tr:nth-child(odd) {
     padding: 0 1em;
     border: 1px solid transparent;
 }
-.alink_btns a.disabled {
+.alink_btns a.disabled,
+.alink_btns a:not([href]):hover {
     color: #666;
     background: #f0f0f0;
 }
 .alink_btns a:not([href]) {
-    color: #666;
+    color: #999;
 }
 .alink_btns a[href]:hover, .alink_btns a[href]:focus {
     border-color: currentColor;
@@ -480,4 +481,28 @@ table.strip tr:nth-child(odd) {
     border-left: none;
     margin-left: -300px;
     text-align: right;
+}
+
+.homepage-links {
+    list-style: none;
+    padding-left: 0;
+}
+
+.homepage-links li {
+    margin-left: 20ex;
+    line-height: 1.5;
+    margin-bottom: .5em;
+}
+
+.homepage-links li a {
+    margin-left: -20ex;
+    margin-top: -.2em;
+    padding: .2em 1ex;
+    position: absolute;
+    width: 18ex;
+}
+
+.homepage-links li a:hover,
+.homepage-links li a:focus {
+    background-color: #FFF;
 }

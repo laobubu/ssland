@@ -3,9 +3,6 @@
 
 <section class="accounts">
     <h2>{{ title }}</h2>
-    {% if perms.web.change_proxyaccount %}
-    <p>To manage users' accounts, visit <a href="/admin/user/">Users</a> page.</p>
-    {% endif %}
 {% for account in accounts %}
     <div class="account{% if not account.enabled %} disabled{% endif %}">
         <h3 id="{{ account.service }}">
@@ -26,6 +23,13 @@
                 <a class="flick" href="/account/traffic/{{ account.service }}/">Stat</a> {% endif %}
         </p>
     </div>
+{% empty %}
+    {% if perms.web.change_proxyaccount %}
+    <p>Hello, new administrator! You have no proxy account yet.</p>
+    <p>Visit <a href="/admin/user/">[Users]</a> page to start.</p>
+    {% else %}
+    <p>You have no proxy account. Contact administrator to create one.</p>
+    {% endif %}
 {% endfor %}
 </section>
 

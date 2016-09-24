@@ -51,6 +51,17 @@ class ProxyAccount(models.Model):
             logging.error("Failed to update service for ProxyAccount %d", self.pk)
         super(ProxyAccount, self).save(*args, **kw)
 
+    def delete(self, *args, **kw):
+        try:
+            if self.is_active:
+                getService(self.service).remove(self.config)
+        except Exception as e2:
+            from core.util import print_exception
+            import logging
+            print_exception(e2)
+            logging.error("Failed to stop ProxyAccount %d before deleting", self.pk)
+        super(ProxyAccount, self).delete(*args, **kw)
+
     @property
     def html(self):
         cl = getService(self.service)
