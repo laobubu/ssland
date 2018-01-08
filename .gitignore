@@ -8,3 +8,4 @@ typings/
 db.sqlite3
 web/migrations/
 web/article/*
+ssland_env/
