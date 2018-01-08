@@ -9,7 +9,8 @@ if grep -P 'WIZARD_GENERATED' config.py; then
     confirm "Still continue?" || exit 0
 else
     # Generate random salt
-    sed config.py -r -i -e "s|^SECRET_KEY.+$|SECRET_KEY = '`openssl rand -base64 32`'|"
+    RAND_KEY="$(2>/dev/null openssl rand -base64 32)"
+    sed config.py -r -i -e "s|^SECRET_KEY.+$|SECRET_KEY = '${RAND_KEY}'|"
 fi
 
 echo "[ALLOWED_HOSTS]"
@@ -36,11 +37,45 @@ sed config.py -r -i                                             \
     -e "s|^DEBUG = True|DEBUG = False|"                         \
     -e "7a# WIZARD_GENERATED = '`date`'"
 
+echo "[SHADOWSOCKS]"
+
+SS_CFG=`grep -Po 'config-file": "([^"]+)' service/Shadowsocks.py`
+SS_CFG=${SS_CFG:15}
+touch $SS_CFG && {
+    echo "Using $SS_CFG as ssserver configuration."
+} || {
+    SS_CFG2="ssserver.json"
+    SRV_IPS=`ifconfig | awk '/inet6? (\S+)/{ gsub(/^[^\:]+\:\s*/,""); gsub(/\//," "); print $1 }'`
+    SRV_IP=`echo $SRV_IPS | awk '{print $1}'`
+    echo "File $SS_CFG not accessible."
+    echo "I can generate $SS_CFG2 and use it now, otherwise, you must use create $SS_CFG manually."
+    confirm "Create $SS_CFG2 and continue ? (recommended)" && {
+        echo "Your server has these IP address: "
+        for ip in $SRV_IPS ; do echo " + $ip"; done
+        echo "Please choose one as the Shadowsocks server IP."
+        SRV_IP=`read2 'Server IP' $SRV_IP`
+        
+        >$SS_CFG2 cat <<EOF
+{
+    "server": "$SRV_IP",
+    "port_password": {},
+    "timeout": 300,
+    "method": "aes-256-cfb"
+}
+EOF
+        echo "$SS_CFG2 is generated."
+        [ -d .git ] && (2>&1 type git) && git add $SS_CFG2
+
+        sed service/Shadowsocks.py -i -e "s|$SS_CFG|$SS_CFG2|"
+        echo "File service/Shadowsocks.py is updated."
+    } || echo "[!!] You shall create $SS_CFG manually."
+}
+
 echo "[DJANGO]"
 
 ./tools/init_django.sh
 
-[ -d .git ] && git commit -am "Finish the setup wizard." >/dev/null 
+[ -d .git ] && (2>&1 type git) && git commit -am "Finish the setup wizard." >/dev/null 
 
 echo "[FINISHED]"
 

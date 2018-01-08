@@ -10,7 +10,12 @@ confirm () {
     esac
 }
 
-pip install -r requirements.txt
+pip install -r requirements.txt || {
+    echo "Faild to install dependencies with pip"
+    echo "You shall execute ` pip install -r requirements.txt ` with proper privilege."
+    confirm "Do you want to try again with `sudo` ?" && sudo pip install -r requirements.txt
+}
+
 ./django-manage.py makemigrations web
 ./django-manage.py migrate
 
