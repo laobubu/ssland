@@ -39,7 +39,7 @@ sed config.py -r -i                                             \
 
 echo "[SHADOWSOCKS]"
 
-SS_CFG=`grep -Po 'config-file": "([^"]+)' service/Shadowsocks.py`
+SS_CFG=`grep -Po 'config-file": "([^"]+)' config.py`
 SS_CFG=${SS_CFG:15}
 touch $SS_CFG && {
     echo "Using $SS_CFG as ssserver configuration."
@@ -63,11 +63,11 @@ touch $SS_CFG && {
     "method": "aes-256-cfb"
 }
 EOF
-        echo "$SS_CFG2 is generated."
+        echo -n "$SS_CFG2 is generated"
         [ -d .git ] && (2>&1 type git) && git add $SS_CFG2
 
-        sed service/Shadowsocks.py -i -e "s|$SS_CFG|$SS_CFG2|"
-        echo "File service/Shadowsocks.py is updated."
+        sed config.py -i -e "s|$SS_CFG|$SS_CFG2|"
+        echo " and applied."
     } || echo "[!!] You shall create $SS_CFG manually."
 }
 
