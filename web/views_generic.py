@@ -15,15 +15,17 @@ def generate_traffic_view(request, stats_objects, title, padding=0.05):
 
     try:
         qto = parse_date(request.GET['to'])
-        stats = stats.filter(time__lt = qto + timezone.timedelta(days=1, hours=2))
     except:
         qto = timezone.now()
     
     try:
         qfrom = parse_date(request.GET['from'])
-        stats = stats.filter(time__gt = qfrom - timezone.timedelta(hours=2))
     except:
         qfrom = qto - timezone.timedelta(days=7, hours=2)
+
+    stats = stats \
+        .filter(time__lt = qto + timezone.timedelta(days=1, hours=2)) \
+        .filter(time__gt = qfrom - timezone.timedelta(hours=2))
 
     if not stats:
         return render(request, 'traffic.html', {
