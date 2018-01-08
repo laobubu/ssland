@@ -39,7 +39,7 @@ sed config.py -r -i                                             \
 
 echo "[SHADOWSOCKS]"
 
-SS_CFG=`grep -Po 'config-file": "([^"]+)' config.py`
+SS_CFG=`grep -Po 'config-file": "([^"]+)' config.py | head -n 1`
 SS_CFG=${SS_CFG:15}
 touch $SS_CFG && {
     echo "Using $SS_CFG as ssserver configuration."
