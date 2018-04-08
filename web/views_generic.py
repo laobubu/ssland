@@ -68,6 +68,7 @@ def generate_traffic_view(request, stats_objects, title, padding=0.05):
                 'x_percent': _percent,
                 'time': _gtime
             })
+        _gtime = _gtime + timezone.timedelta(days=1)
 
     return render(request, 'traffic.html', {
         'title': title, 
